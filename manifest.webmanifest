@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "English Adventure ป.1–ป.6",
+  "short_name": "English Adventure",
+  "description": "บทเรียนภาษาอังกฤษ ป.1–ป.6 พร้อมฝึกอ่าน เกม คะแนน และเส้นทางเรียนรู้ตามหลักสูตรโรงเรียน",
+  "lang": "th-TH",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f7fc",
+  "theme_color": "#f4f7ff",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
