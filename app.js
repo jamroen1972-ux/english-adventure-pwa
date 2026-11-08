@@ -106,5 +106,5 @@ function finishQuiz(){const p=child(),c=getCourse(),v=versionData(),score=Math.r
 
 document.getElementById('installBtn').onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;return}if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){toast('ติดตั้งแอปนี้บนอุปกรณ์แล้วครับ');return}toast(/iphone|ipad|ipod/i.test(navigator.userAgent)?'แตะปุ่มแชร์ของเบราว์เซอร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”':'แตะเมนู ⋮ ของเบราว์เซอร์ แล้วเลือก “ติดตั้งแอป” หรือ “เพิ่มไปยังหน้าจอหลัก”')};
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 syncCourse();renderAll();
