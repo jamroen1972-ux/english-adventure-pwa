@@ -1,5 +1,5 @@
 const KEY='english-adventure-p2-v1';
-const APP_VERSION='10.0';
+const APP_VERSION='10.1';
 const APP_AUTHOR='Jamroen Suwanphum';
 let state=loadState();
 let selectedId=state.activeId||state.profiles[0].id;
@@ -10,7 +10,7 @@ let quiz=null;
 let deferredPrompt=null;
 let pendingPhoto='';
 let pendingBannerPhotos=[];
-let bannerIndex=-1;
+let bannerIndex=0;
 let bannerTimer=null;
 let bannerCurrentSource='';
 let lastBannerEffect='';
@@ -43,7 +43,7 @@ function syncCourse(){const previousId=activeUnit?.id,p=child(),c=getCourse(p);a
 function save(){state.activeId=selectedId;localStorage.setItem(KEY,JSON.stringify(state));renderAll()}
 function escapeHTML(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2300)}
-function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===(id==='guideView'?'settingsView':id)));const introVideo=document.getElementById('homeIntroVideo');if(introVideo){if(id==='homeView'&&!introVideo.classList.contains('is-hidden')){if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)introVideo.play().catch(()=>{})}else introVideo.pause()}if(id==='progressView')renderReport();if(id==='settingsView')renderSettings();if(id==='lessonsView')renderUnits();if(id==='translateView')document.getElementById('translateInput').focus({preventScroll:true});window.scrollTo({top:0,behavior:'smooth'})}
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===(id==='guideView'?'settingsView':id)));if(id==='progressView')renderReport();if(id==='settingsView')renderSettings();if(id==='lessonsView')renderUnits();if(id==='translateView')document.getElementById('translateInput').focus({preventScroll:true});window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
 document.getElementById('profilePicker').onclick=()=>showView('settingsView');
 document.getElementById('noticeButton').onclick=()=>showView('noticeView');document.getElementById('noticeBack').onclick=()=>showView('settingsView');document.getElementById('guideButton').onclick=()=>showView('guideView');document.getElementById('guideBack').onclick=()=>showView('settingsView');
@@ -61,25 +61,12 @@ function compressPhoto(file,maxEdge=1200,quality=.78){return new Promise((resolv
 document.getElementById('photoInput').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{pendingPhoto=await compressPhoto(f,500,.78);document.getElementById('editAvatar').innerHTML=`<img src="${pendingPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`}catch(err){toast('เปิดรูปนี้ไม่ได้ ลองเลือกรูปอื่นนะครับ')}};
 function renderBannerPreviews(){const p=child(),list=document.getElementById('bannerPreviewList');if(!list)return;const photos=[...(p.bannerPhotos||[])],positions=p.bannerPositions||[];list.innerHTML=photos.length?photos.map((src,i)=>`<div class="banner-thumb"><img src="${src}" alt="ภาพพื้นหลัง ${i+1}" style="object-position:center ${positions[i]??30}%"><label for="bannerPosition${i}">จัดตำแหน่งภาพ</label><input type="range" id="bannerPosition${i}" min="0" max="100" value="${positions[i]??30}" data-banner-position="${i}" aria-label="จัดตำแหน่งภาพ ${i+1}"><button type="button" class="thumb-remove" onclick="removeBannerPhoto(${i})" aria-label="ลบภาพ ${i+1}">×</button></div>`).join(''):'<span class="muted">ยังไม่ได้เพิ่มภาพ ระบบจะแสดงพื้นหลังสีสดใส</span>';document.getElementById('bannerCount').textContent=`${photos.length}/5 ภาพ`;const upload=document.getElementById('bannerPhotoInput');if(upload)upload.disabled=photos.length>=5;list.querySelectorAll('[data-banner-position]').forEach(input=>input.oninput=()=>{const idx=Number(input.dataset.bannerPosition);const preview=input.closest('.banner-thumb').querySelector('img');preview.style.objectPosition=`center ${input.value}%`;if(Number.isInteger(idx)){p.bannerPositions=p.bannerPositions||[];p.bannerPositions[idx]=Number(input.value);renderBanner()}});list.querySelectorAll('[data-banner-position]').forEach(input=>input.onchange=()=>{localStorage.setItem(KEY,JSON.stringify(state))})}
 function renderBanner(animate=false){
- const p=child(),hero=document.getElementById('homeHero');if(!hero)return;
- const photos=p.bannerPhotos?.length?p.bannerPhotos:[],dots=document.getElementById('heroDots'),introVideo=hero.querySelector('#homeIntroVideo');
- const useVideo=!photos.length||bannerIndex<0;
- if(useVideo){
-  bannerIndex=-1;hero.style.backgroundImage='';hero.classList.remove('has-photo');hero.classList.add('has-intro-video');bannerCurrentSource='';hero.querySelector('.banner-photo-layer')?.remove();
-  if(introVideo){introVideo.classList.remove('is-hidden');if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)introVideo.play().catch(()=>{})}
-  if(bannerTimer){clearInterval(bannerTimer);bannerTimer=null}
-  if(dots)dots.innerHTML=photos.length?'<button class="hero-dot active" aria-label="แสดงวิดีโอแนะนำ" onclick="setBannerVideo()"></button>'+photos.map((_,i)=>'<button class="hero-dot" aria-label="แสดงภาพ '+(i+1)+'" onclick="setBannerPhoto('+i+')"></button>').join(''):'';
-  return;
- }
- if(introVideo){introVideo.pause();introVideo.classList.add('is-hidden')}
- hero.classList.remove('has-intro-video');
- if(bannerIndex>=photos.length)bannerIndex=0;
- const source=photos[bannerIndex],focus=p.bannerPositions?.[bannerIndex]??30,prior=hero.querySelector('.banner-photo-layer');if(prior)prior.remove();
+ const p=child(),hero=document.getElementById('homeHero');if(!hero)return;const photos=p.bannerPhotos?.length?p.bannerPhotos:(p.photo?[p.photo]:[]);const dots=document.getElementById('heroDots');
+ if(!photos.length){hero.style.backgroundImage='';hero.classList.remove('has-photo');bannerCurrentSource='';hero.querySelector('.banner-photo-layer')?.remove();if(dots)dots.innerHTML='';return}
+ bannerIndex=bannerIndex%photos.length;const source=photos[bannerIndex],focus=p.bannerPositions?.[bannerIndex]??30;const prior=hero.querySelector('.banner-photo-layer');if(prior)prior.remove();
  if(animate&&bannerCurrentSource&&source!==bannerCurrentSource){const effects=['fade','zoom-in','zoom-out','blur-in','soft-focus','tone-in','fade-zoom-in','fade-zoom-out','glow-settle','gentle-depth'];let choices=effects.filter(effect=>effect!==lastBannerEffect);const effect=choices[Math.floor(Math.random()*choices.length)];lastBannerEffect=effect;const layer=document.createElement('div');layer.className=`banner-photo-layer enter-${effect}`;layer.style.backgroundImage=`url("${source}")`;layer.style.backgroundPosition=`center ${focus}%`;hero.appendChild(layer);const finish=()=>{if(bannerCurrentSource===source)hero.style.backgroundImage=`url("${source}")`;layer.remove()};layer.addEventListener('animationend',finish,{once:true});setTimeout(finish,900)}else hero.style.backgroundImage=`url("${source}")`;
- bannerCurrentSource=source;hero.style.backgroundPosition=`center ${focus}%`;hero.classList.add('has-photo');if(dots)dots.innerHTML='<button class="hero-dot" aria-label="แสดงวิดีโอแนะนำ" onclick="setBannerVideo()"></button>'+photos.map((_,i)=>'<button class="hero-dot '+(i===bannerIndex?'active':'')+'" aria-label="แสดงภาพ '+(i+1)+'" onclick="setBannerPhoto('+i+')"></button>').join('');
- if(!bannerTimer&&photos.length>1)bannerTimer=setInterval(()=>{bannerIndex=(bannerIndex+1)%photos.length;renderBanner(true)},6500)
+ bannerCurrentSource=source;hero.style.backgroundPosition=`center ${focus}%`;hero.classList.add('has-photo');if(dots)dots.innerHTML=photos.length>1?photos.map((_,i)=>`<button class="hero-dot ${i===bannerIndex?'active':''}" aria-label="แสดงภาพ ${i+1}" onclick="setBannerPhoto(${i})"></button>`).join(''):'';if(!bannerTimer&&photos.length>1)bannerTimer=setInterval(()=>{bannerIndex=(bannerIndex+1)%photos.length;renderBanner(true)},6500)
 }
-function setBannerVideo(){bannerIndex=-1;renderBanner()}
 function setBannerPhoto(i){bannerIndex=i;renderBanner(true)}
 function removeBannerPhoto(i){const p=child();p.bannerPhotos=(p.bannerPhotos||[]).filter((_,n)=>n!==i);p.bannerPositions=(p.bannerPositions||[]).filter((_,n)=>n!==i);bannerIndex=0;save()}
 document.getElementById('bannerPhotoInput').onchange=async e=>{const files=[...e.target.files];if(!files.length)return;const p=child(),existing=p.bannerPhotos||[],remaining=5-existing.length;if(files.length>remaining){toast(`เพิ่มได้อีก ${remaining} ภาพ (สูงสุด 5 ภาพ)`);e.target.value='';return}try{const photos=await Promise.all(files.map(f=>compressPhoto(f,1400,.76)));p.bannerPhotos=[...existing,...photos];p.bannerPositions=p.bannerPositions||[];photos.forEach(()=>p.bannerPositions.push(30));bannerIndex=0;bannerCurrentSource='';save();toast('เพิ่มภาพพื้นหลังแล้ว');e.target.value=''}catch(err){toast('เปิดภาพบางไฟล์ไม่ได้ ลองเลือกภาพอื่นครับ')}};
@@ -135,4 +122,11 @@ function finishQuiz(){const p=child(),c=getCourse(),v=versionData(),score=Math.r
 document.getElementById('installBtn').onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;return}if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){toast('ติดตั้งแอปนี้บนอุปกรณ์แล้วครับ');return}toast(/iphone|ipad|ipod/i.test(navigator.userAgent)?'แตะปุ่มแชร์ของเบราว์เซอร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”':'แตะเมนู ⋮ ของเบราว์เซอร์ แล้วเลือก “ติดตั้งแอป” หรือ “เพิ่มไปยังหน้าจอหลัก”')};
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-syncCourse();renderAll();
+function startIntroVideo(){
+ const overlay=document.getElementById('introVideoOverlay'),video=document.getElementById('introVideoPlayer'),soundButton=document.getElementById('introSoundButton');if(!overlay||!video||!soundButton)return;
+ let finished=false;const finish=()=>{if(finished)return;finished=true;video.pause();overlay.hidden=true};
+ video.addEventListener('ended',finish,{once:true});video.addEventListener('error',finish,{once:true});
+ soundButton.onclick=()=>{video.muted=!video.muted;video.volume=1;soundButton.textContent=video.muted?'🔊 แตะเพื่อเปิดเสียง':'🔇 ปิดเสียง';soundButton.setAttribute('aria-label',video.muted?'เปิดเสียงวิดีโอ':'ปิดเสียงวิดีโอ');video.play().catch(()=>{video.muted=true;soundButton.textContent='🔊 แตะเพื่อเปิดเสียง'})};
+ video.muted=false;video.volume=1;video.play().then(()=>{soundButton.textContent='🔇 ปิดเสียง';soundButton.setAttribute('aria-label','ปิดเสียงวิดีโอ')}).catch(()=>{video.muted=true;soundButton.textContent='🔊 แตะเพื่อเปิดเสียง';soundButton.setAttribute('aria-label','แตะเพื่อเปิดเสียงวิดีโอ');video.play().catch(()=>{soundButton.textContent='▶ แตะเพื่อเล่นวิดีโอ'})});
+}
+syncCourse();renderAll();startIntroVideo();
