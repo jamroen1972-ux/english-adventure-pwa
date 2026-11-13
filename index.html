@@ -145,6 +145,19 @@
   .intro-sound-button{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:2;border:1px solid #ffffff90;border-radius:999px;padding:12px 17px;background:#31263be8;color:#fff;font-weight:900;box-shadow:0 5px 20px #0006}
   @media(prefers-reduced-motion:reduce){.intro-video-player{scroll-behavior:auto}}
 </style>
+
+<style>
+  .animal-words-section{margin-top:28px}
+  .animal-words-card{border-color:#dce7ff;background:linear-gradient(145deg,#fff,#f4f8ff)}
+  .animal-words-card .unit-emoji{background:#e5f8f2}
+  .animal-words-card .unit-foot button{background:linear-gradient(145deg,#6685f4,#4f73ec);color:#fff}
+  #animalWordsOverlay{position:fixed;inset:0;z-index:10050;display:flex;flex-direction:column;background:#f5f7fc}
+  #animalWordsOverlay[hidden]{display:none!important}
+  .animal-words-bar{display:flex;align-items:center;gap:12px;padding:calc(9px + env(safe-area-inset-top)) 14px 9px;background:#fff;border-bottom:1px solid #e8edf7;box-shadow:0 4px 12px #3048750a}
+  .animal-words-bar strong{flex:1;font-size:15px}
+  .animal-words-back{border:0;border-radius:12px;padding:10px 14px;background:#edf2ff;color:#405dc5;font-weight:900}
+  #animalWordsFrame{width:100%;flex:1;min-height:0;border:0;background:#cfe6ff}
+</style>
 </head>
 <body>
 <div class="intro-video-overlay" id="introVideoOverlay" role="dialog" aria-label="วิดีโอแนะนำ English Adventure"><video class="intro-video-player" id="introVideoPlayer" autoplay playsinline preload="auto" poster="./home-intro-poster.jpg" aria-label="วิดีโอแนะนำแอป English Adventure"><source src="./home-intro.mp4" type="video/mp4"></video><button class="intro-sound-button" id="introSoundButton" type="button" aria-label="ปิดเสียงวิดีโอ">🔇 ปิดเสียง</button></div>
@@ -160,7 +173,16 @@
     <div class="panel daily-timer"><div style="font-size:34px">⏱️</div><div class="daily-timer-copy"><h3>เป้าหมายการเรียนวันนี้</h3><strong id="studyTimeLabel">0:00 / 60:00 นาที</strong><div class="timer-track"><i id="studyTimeBar"></i></div><p class="install-hint" id="studyTimeNote">เวลาจะนับตอนอยู่ในหน้าบทเรียนและกิจกรรม</p></div></div>
     <section class="special-tools"><div class="section-head"><div><h2>เมนูพิเศษ</h2><p>เครื่องมือช่วยสื่อสาร แยกจากบทเรียน</p></div></div><button class="special-tool-card" type="button" onclick="showView('interpreterView')"><span class="special-tool-icon">🗣️</span><span class="special-tool-copy"><em>ENGLISH ADVENTURE · SPECIAL</em><strong>ล่ามแปลภาษา</strong><small>คุยกันสองฝ่ายด้วยเสียงและแปลให้อัตโนมัติ</small></span><span class="special-tool-arrow" aria-hidden="true">›</span></button></section>
   </section>
-  <section class="view" id="lessonsView"><div class="section-head"><div><h2>บทเรียน <span id="courseGradeTitle">ป.2</span></h2><p id="courseTrackNote">เลือกเรื่องที่อยากเรียนวันนี้ได้เลย</p></div></div><div class="panel" id="versionPanel" style="margin-bottom:16px"></div><div id="alphabetEntry"></div><div class="unit-grid" id="allUnits"></div></section>
+  <section class="view" id="lessonsView"><div class="section-head"><div><h2>บทเรียน <span id="courseGradeTitle">ป.2</span></h2><p id="courseTrackNote">เลือกเรื่องที่อยากเรียนวันนี้ได้เลย</p></div></div><div class="panel" id="versionPanel" style="margin-bottom:16px"></div><div id="alphabetEntry"></div><div class="unit-grid" id="allUnits"></div>
+  <section class="animal-words-section" id="animalWordsSection" hidden>
+    <div class="section-head"><div><h2>เกมเสริมท้ายบทเรียน</h2><p>แนะนำสำหรับ ป.1–ป.3 · เหมาะที่สุดกับ ป.1–ป.2</p></div></div>
+    <article class="unit animal-words-card">
+      <div class="unit-top"><div class="unit-emoji">🐾</div><span class="tag">ป.1–ป.3</span></div>
+      <h3>ลูกบอลกระโดด · Animal Words</h3>
+      <p>ดูภาพแล้วเลือกคำศัพท์อังกฤษ มีหมวดสัตว์ ผลไม้ สี ตัวเลข และร่างกาย พร้อมโหมดสะกดคำ</p>
+      <div class="unit-foot"><span>ดูภาพ · เลือกคำ · สะกดคำ</span><button type="button" onclick="openAnimalWords()">เล่นเกม</button></div>
+    </article>
+  </section></section>
   <section class="view" id="studyView"></section>
   <section class="view" id="alphabetView"></section>
   <section class="view" id="translateView"><div class="section-head"><div><h2>💬 ถาม–แปล</h2><p>พิมพ์หรือพูดภาษาไทยหรืออังกฤษ แล้วฟังคำแปลได้</p></div></div><div class="panel translate-panel"><div class="translate-intro"><span class="translate-orb">🌐</span><div><h3>มีคำถามหรือคำศัพท์ที่อยากรู้ไหม?</h3><p class="muted">ถามเป็นภาษาไทยเพื่อแปลเป็นอังกฤษ หรือถามเป็นอังกฤษเพื่อแปลเป็นไทย</p></div></div><label for="translateInput" class="translate-label">คำหรือประโยค</label><textarea id="translateInput" rows="4" maxlength="500" placeholder="ตัวอย่าง: หมาตัวนี้น่ารัก หรือ What is your favorite color?"></textarea><div class="translate-actions"><button class="secondary mic-translate" id="micThaiBtn">🎙️ พูดภาษาไทย</button><button class="secondary mic-translate" id="micEnglishBtn">🎙️ Speak English</button><button class="primary translate-submit" id="translateBtn">แปลให้ฉัน</button></div><p id="translateStatus" class="install-hint" aria-live="polite">ใช้การแปลออนไลน์ ต้องเชื่อมต่ออินเทอร์เน็ต ข้อความที่ส่งจะแชร์กับบริการแปลเพื่อประมวลผล กรุณาอย่าพิมพ์ข้อมูลส่วนตัว</p><div id="translateResult" class="translate-result" aria-live="polite"><div class="translate-empty">คำแปลจะแสดงตรงนี้ ✨</div></div></div></section>
@@ -176,5 +198,10 @@
 <script src="./app.js"></script>
 <script src="./learning-plus.js"></script>
 
+
+<div id="animalWordsOverlay" hidden aria-hidden="true">
+  <div class="animal-words-bar"><button class="animal-words-back" type="button" onclick="closeAnimalWords()">← กลับบทเรียน</button><strong>ลูกบอลกระโดด · Animal Words</strong></div>
+  <iframe id="animalWordsFrame" title="เกมลูกบอลกระโดด Animal Words" allow="autoplay; fullscreen" allowfullscreen></iframe>
+</div>
 </body>
 </html>
