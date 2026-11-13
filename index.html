@@ -135,6 +135,16 @@
   @media(max-width:520px){.camera-source-actions{gap:10px}.camera-source-button{width:68px;height:68px;border-radius:18px}.gallery-source-button{min-height:58px;padding:0 10px;font-size:13px}.camera-page .camera-preview{min-height:185px}}
   </style>
 
+
+<style>
+  #homeHero.has-intro-video{background:linear-gradient(135deg,#eedcff,#fff0cc 55%,#d8f7ef);}
+  #homeIntroVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#f1e6fb;z-index:1;}
+  #homeHero.has-photo #homeIntroVideo{display:none;}
+  #homeIntroVideo.is-hidden{display:none;}
+  #homeHero .hero-dots{z-index:3;}
+  @media(max-width:520px){#homeHero.has-intro-video{height:min(58vh,500px);min-height:270px;border-radius:22px;}}
+  @media(prefers-reduced-motion:reduce){#homeIntroVideo{scroll-behavior:auto;}}
+</style>
 </head>
 <body>
 <main class="app">
@@ -143,7 +153,7 @@
     <div class="top-actions"><button class="icon-btn" id="voiceToggle" type="button" aria-pressed="true" title="ปิดเสียงครู">🔊 <span class="voice-label">เสียงครู</span></button><button class="pill profile-pill" id="profilePicker" aria-label="เปิดโปรไฟล์"><span class="avatar" id="topAvatar">🧒</span><span class="profile-name" id="topName">นักเรียน</span></button></div>
   </header>
   <section class="view active" id="homeView">
-    <div class="hero"><div class="hero-copy hero-message"><div class="eyebrow">LET'S LEARN TOGETHER</div><h1 id="helloTitle">พร้อมออกผจญภัยหรือยัง?</h1><p>มาฝึกคำศัพท์ ฟังเสียง และอ่านประโยคภาษาอังกฤษไปด้วยกันทีละนิด เก่งขึ้นได้ทุกวันเลย!</p></div><div class="hero-banner" id="homeHero" aria-label="ภาพแบนเนอร์ของนักเรียน"><div class="hero-dots" id="heroDots"></div></div><button class="hero-btn" onclick="startLearning()">เริ่มเรียนกันเลย</button></div>
+    <div class="hero"><div class="hero-copy hero-message"><div class="eyebrow">LET'S LEARN TOGETHER</div><h1 id="helloTitle">พร้อมออกผจญภัยหรือยัง?</h1><p>มาฝึกคำศัพท์ ฟังเสียง และอ่านประโยคภาษาอังกฤษไปด้วยกันทีละนิด เก่งขึ้นได้ทุกวันเลย!</p></div><div class="hero-banner has-intro-video" id="homeHero" aria-label="วิดีโอแนะนำ English Adventure"><video class="home-intro-video" id="homeIntroVideo" autoplay muted loop playsinline preload="none" controls poster="./home-intro-poster.jpg" aria-label="วิดีโอแนะนำแอป English Adventure"><source src="./home-intro.mp4" type="video/mp4"></video><div class="hero-dots" id="heroDots"></div></div><button class="hero-btn" onclick="startLearning()">เริ่มเรียนกันเลย</button></div>
     <div class="section-head"><div><h2>การเรียนของฉัน</h2><p>ทุกความพยายามมีความหมาย 🌱</p></div><button class="text-btn" onclick="showView('progressView')">ดูพัฒนาการ </button></div>
     <div class="stats"><div class="stat"><div class="stat-icon">⭐</div><div><b id="pointsStat">0</b><span>คะแนนสะสม</span></div></div><div class="stat"><div class="stat-icon">📚</div><div><b id="lessonStat">0</b><span>บทที่เรียนจบ</span></div></div><div class="stat"><div class="stat-icon">🔥</div><div><b id="streakStat">0</b><span>วันที่ฝึกต่อเนื่อง</span></div></div></div>
     <div class="panel daily-timer"><div style="font-size:34px">⏱️</div><div class="daily-timer-copy"><h3>เป้าหมายการเรียนวันนี้</h3><strong id="studyTimeLabel">0:00 / 60:00 นาที</strong><div class="timer-track"><i id="studyTimeBar"></i></div><p class="install-hint" id="studyTimeNote">เวลาจะนับตอนอยู่ในหน้าบทเรียนและกิจกรรม</p></div></div>
