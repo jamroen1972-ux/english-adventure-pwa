@@ -128,10 +128,10 @@ document.getElementById('installBtn').onclick=async()=>{if(deferredPrompt){defer
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 function startIntroVideo(){
- const overlay=document.getElementById('introVideoOverlay'),video=document.getElementById('introVideoPlayer'),startButton=document.getElementById('introStartButton');if(!overlay||!video||!startButton)return;
+ const overlay=document.getElementById('introVideoOverlay'),video=document.getElementById('introVideoPlayer');if(!overlay||!video)return;
  let finished=false;const finish=()=>{if(finished)return;finished=true;video.pause();overlay.hidden=true};
- video.addEventListener('ended',finish,{once:true});video.addEventListener('error',finish,{once:true});startButton.addEventListener('click',finish,{once:true});
- video.muted=false;video.volume=1;video.play().catch(()=>{video.muted=true;video.play().catch(finish)});
+ overlay.addEventListener('click',finish);video.addEventListener('ended',finish,{once:true});video.addEventListener('error',finish,{once:true});
+ video.muted=false;video.volume=1;const play=video.play();if(play&&typeof play.catch==='function')play.catch(()=>{video.muted=true;video.play().catch(()=>{})});
 }
 syncCourse();renderAll();startIntroVideo();
 

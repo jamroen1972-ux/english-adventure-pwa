@@ -1,4 +1,4 @@
-const CACHE='english-adventure-p2-v43';
+const CACHE='english-adventure-p2-v44';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg','./app.js','./courses.js','./learning-plus.js','./translator-banner.png','./home-intro-poster.jpg','./animal-words.html','./word-jump-grades-3-6/','./word-jump-grades-3-6/three.min.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
