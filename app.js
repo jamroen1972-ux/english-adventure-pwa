@@ -1,4 +1,4 @@
-word-jump-grades-3-6jump-grades-3-6 KEY='english-adventure-p2-v1';
+const KEY='english-adventure-p2-v1';
 const APP_VERSION='10.2';
 const APP_AUTHOR='Jamroen Suwanphum';
 let state=loadState();
@@ -130,7 +130,8 @@ if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serv
 function startIntroVideo(){
  const overlay=document.getElementById('introVideoOverlay'),video=document.getElementById('introVideoPlayer');if(!overlay||!video)return;
  let finished=false;const finish=()=>{if(finished)return;finished=true;video.pause();overlay.hidden=true};
- overlay.addEventListener('click',finish);video.addEventListener('ended',finish,{once:true});video.addEventListener('error',finish,{once:true});
+ overlay.addEventListener('click',finish);overlay.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' ')finish()});
+ video.addEventListener('ended',finish,{once:true});video.addEventListener('error',finish,{once:true});
  video.muted=false;video.volume=1;const play=video.play();if(play&&typeof play.catch==='function')play.catch(()=>{video.muted=true;video.play().catch(()=>{})});
 }
 syncCourse();renderAll();startIntroVideo();
