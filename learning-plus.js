@@ -577,6 +577,7 @@
   function gradeForScore(score){return score>=80?'A':score>=70?'B':score>=60?'C':'D'}
   function gradeMeaning(g){return g==='A'?'ยอดเยี่ยม':g==='B'?'ดีมาก':g==='C'?'กำลังพัฒนา':'ควรฝึกเพิ่ม'}
   function alphabetAdvice(skill,title){
+    if(skill==='phonics')return 'ทบทวนเสียงตัวอักษรและผสมคำชุดเดิมอีกครั้ง แล้วลองลากเรียงคำโดยฟังเสียงทีละส่วน';
     if(skill==='find')return 'ฝึกหาตัวพิมพ์เล็กและตัวพิมพ์ใหญ่บนคีย์บอร์ดแบบสุ่ม วันละ 5 นาที';
     if(skill==='match')return 'ทบทวนคู่ตัวอักษร เช่น A–a, B–b แล้วลองจับคู่ชุดละ 5 ตัว';
     if(skill==='vowel')return 'ทบทวนสระ A, E, I, O, U และเสียงสั้นจากคำ apple, egg, igloo, orange, umbrella';
@@ -586,6 +587,7 @@
     const rows=[];
     Object.values(p.courseData||{}).forEach(c=>Object.values(c.versions||{}).forEach(v=>(v.history||[]).forEach(h=>rows.push({date:h.date,score:Number(h.score)||0,skill:h.skill||'lesson',title:h.title||'บทเรียน'}))));
     (p.alphabetHistory||[]).forEach(h=>rows.push({date:h.date,score:Number(h.score)||0,skill:h.skill||'find',title:h.title||'เกมตัวอักษร'}));
+    (p.phonicsHistory||[]).forEach(h=>rows.push({date:h.date,score:Number(h.score)||0,skill:'phonics',title:h.title||'เกมผสมเสียง 3D'}));
     return rows.filter(x=>x.date&&Number.isFinite(x.score));
   }
   function renderDailyAssessment(){
@@ -606,7 +608,7 @@
     const recent=keys.map(key=>{
       const list=days[key],avg=Math.round(list.reduce((n,r)=>n+r.score,0)/list.length),g=gradeForScore(avg),d=new Date(key+'T12:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
       const skillScores={};list.forEach(r=>{const k=r.skill||'lesson';(skillScores[k]||(skillScores[k]=[])).push(r.score)});
-      const skills=Object.entries(skillScores).map(([k,vals])=>{const score=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length),label=k==='find'?'หาตัวอักษรบนคีย์บอร์ด':k==='match'?'จับคู่พิมพ์ใหญ่–เล็ก':k==='vowel'?'สระและพยัญชนะ':'บทเรียน';return '<span class="tag">'+label+' '+score+'%</span>'}).join(' ');
+      const skills=Object.entries(skillScores).map(([k,vals])=>{const score=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length),label=k==='find'?'หาตัวอักษรบนคีย์บอร์ด':k==='match'?'จับคู่พิมพ์ใหญ่–เล็ก':k==='vowel'?'สระและพยัญชนะ':k==='phonics'?'ผสมเสียงคำ':'บทเรียน';return '<span class="tag">'+label+' '+score+'%</span>'}).join(' ');
       const lowest=list.slice().sort((a,b)=>a.score-b.score)[0];
       return '<div class="daily-day-card"><div class="daily-day-head"><div><strong>'+d+'</strong><div class="muted">'+list.length+' กิจกรรม · เฉลี่ย '+avg+'%</div></div><span class="daily-grade">'+g+'</span></div><div class="daily-meter"><i style="width:'+avg+'%"></i></div><div class="alpha-stats">'+skills+'</div><div class="daily-advice"><b>'+gradeMeaning(g)+'.</b> '+escapeHTML(alphabetAdvice(lowest?.skill,lowest?.title))+'</div></div>';
     }).join('');
@@ -669,9 +671,17 @@
     alphaGame=null;renderReport();
   }
   const baseRenderUnits=window.renderUnits;
-  if(baseRenderUnits)window.renderUnits=function(){baseRenderUnits();const host=document.getElementById('alphabetEntry');if(!host)return;const grade=Number(child().grade)||2;host.innerHTML='<div class="alphabet-entry"><div class="alphabet-entry-icon">🔤</div><div><h3>'+(grade<=3?'บทพื้นฐาน: ตัวอักษรและสระ A–Z':'เกมทบทวน: ตัวอักษรและสระ A–Z')+'</h3><p>ฝึกตัวพิมพ์ใหญ่–เล็ก เสียงสระ และหาตัวอักษรบนคีย์บอร์ด · ใช้ได้ทุกชั้น ป.1–ป.6</p></div><button type="button" onclick="openAlphabetPractice()">เริ่มฝึก 🎮</button></div>'};
+  if(baseRenderUnits)window.renderUnits=function(){baseRenderUnits();const host=document.getElementById('alphabetEntry'),phonics=document.getElementById('phonics3DEntry');const grade=Math.min(6,Math.max(1,Number(child().grade)||2)),version=Math.min(2,Math.max(1,Number(activeVersion)||1));if(host)host.innerHTML='<div class="alphabet-entry"><div class="alphabet-entry-icon">🔤</div><div><h3>'+(grade<=3?'บทพื้นฐาน: ตัวอักษรและสระ A–Z':'เกมทบทวน: ตัวอักษรและสระ A–Z')+'</h3><p>ฝึกตัวพิมพ์ใหญ่–เล็ก เสียงสระ และหาตัวอักษรบนคีย์บอร์ด · ใช้ได้ทุกชั้น ป.1–ป.6</p></div><button type="button" onclick="openAlphabetPractice()">เริ่มฝึก 🎮</button></div>';if(phonics){const note={1:'ผสมเสียงคำสั้นและคำ CVC',2:'ทบทวนคำสั้นและฝึกพยัญชนะควบ',3:'ฝึก silent e และเสียงสระยาว',4:'ฝึกเสียงผสม สระคู่ และเสียงซับซ้อน',5:'แบ่งคำศัพท์หลายพยางค์เป็นช่วง',6:'อ่านคำหลายพยางค์และคำศัพท์ต่อยอด'};phonics.innerHTML='<div class="alphabet-entry phonics-entry"><div class="alphabet-entry-icon">🧊</div><div><h3>เกมผสมเสียง 3D · ป.'+grade+'</h3><p>เวอร์ชัน '+version+' · '+note[grade]+' · ชุดคำแยกตามชั้นและเวอร์ชัน</p></div><button type="button" onclick="openPhonics3D()">เริ่มฝึก ป.'+grade+' V'+version+' 🎮</button></div>'}};
   const oldReport=window.renderReport;
   window.renderReport=function(){oldReport();const wrap=document.getElementById('reportSummary');if(wrap&&!document.getElementById('dailyStudyReport')){const row=document.createElement('div');row.className='report-row';row.id='dailyStudyReport';row.innerHTML='<span>เวลาเรียนวันนี้</span><b id="dailyStudyReportValue"></b>';wrap.appendChild(row)}const value=document.getElementById('dailyStudyReportValue');if(value)value.textContent=formatTime(secondsToday())+' / '+formatTime(goalSeconds())+' นาที';renderDailyAssessment()};
+  window.addEventListener('message',event=>{
+    if(event.origin!==location.origin)return;
+    const frame=document.getElementById('phonics3DFrame');if(!frame||event.source!==frame.contentWindow)return;
+    const result=event.data;if(!result||result.type!=='english-adventure-phonics-result')return;
+    const grade=Number(child().grade),course=getCourse(),version=Number(result.version),correct=Number(result.correct),total=Number(result.total),score=Number(result.score);
+    if(Number(result.grade)!==grade||version!==activeVersion||version>(course.unlockedVersion||1)||total!==10||correct<0||correct>total||score!==Math.round(correct/total*100))return;
+    const p=child();p.phonicsHistory=p.phonicsHistory||[];p.phonicsHistory.unshift({date:new Date().toISOString(),score:score,correct:correct,total:total,attempts:Number(result.attempts)||0,version:version,title:'เกมผสมเสียง 3D ป.'+grade+' · V'+version});p.phonicsHistory=p.phonicsHistory.slice(0,120);persist();renderReport();toast('บันทึกผลเกมผสมเสียงแล้ว · '+score+'%');
+  });
   document.addEventListener('visibilitychange',()=>{tickStudyTimer();lastTick=Date.now();renderDailyTimer()});
   window.addEventListener('pagehide',()=>{tickStudyTimer();persist()});
   ensureData();
@@ -680,4 +690,5 @@
   renderDailyTimer();
   renderAll();
 })();
+
 

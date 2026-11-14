@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English Adventure · Phonics 3D ป.1</title>
+<style>
+:root{--sky1:#8fd3ff;--sky2:#e8f7ff;--ink:#1d2b53;--btn:#ff6f3c;--btn2:#ffffff;--btn2ink:#1d2b53;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky1:#10153a;--sky2:#3a3f7a;--ink:#f4f5ff;--btn:#ff8a4d;--btn2:#2a2f63;--btn2ink:#f4f5ff}}
+:root[data-theme="dark"]{--sky1:#10153a;--sky2:#3a3f7a;--ink:#f4f5ff;--btn:#ff8a4d;--btn2:#2a2f63;--btn2ink:#f4f5ff}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:linear-gradient(var(--sky1),var(--sky2));color:var(--ink);font-family:"Prompt","Noto Sans Thai",system-ui,sans-serif;display:flex;flex-direction:column}
+#eq{text-align:center;font-size:clamp(26px,7vw,44px);font-weight:700;padding:14px 12px 0;min-height:68px;letter-spacing:.02em}
+#eq b{color:var(--btn)}
+#levelInfo{margin:4px auto 0;max-width:520px;padding:0 16px;text-align:center;font-size:14px;line-height:1.45;font-weight:600;opacity:.9}
+#menu .hint{max-width:440px;margin:0;text-align:center;font-size:14px;line-height:1.5;font-weight:500}
+#stage{flex:1;position:relative;min-height:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#bar{display:flex;gap:10px;justify-content:center;padding:10px 12px 14px}
+button{font:inherit;font-weight:600;font-size:17px;border:0;border-radius:999px;padding:13px 22px;cursor:pointer;background:var(--btn);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+button.alt{background:var(--btn2);color:var(--btn2ink)}
+button:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+#menu{position:fixed;inset:0;z-index:5;background:linear-gradient(var(--sky1),var(--sky2));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+#menu.hide{display:none}
+#menu h1{margin:0;font-size:clamp(26px,7vw,38px)}
+#menu p{margin:6px 0 0;font-weight:600;font-size:18px}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(420px,100%)}
+.row.two{grid-template-columns:1fr 1fr}
+.pick{background:var(--btn2);color:var(--btn2ink);padding:16px 8px}
+.pick[aria-pressed="true"]{background:var(--btn);color:#fff}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="eq" aria-live="polite">กดเล่นได้เลย</div>
+<div id="levelInfo" aria-live="polite"></div>
+<div id="stage"><canvas id="c"></canvas></div>
+<div id="bar"><button id="menuBtn" class="alt" aria-label="เมนู">☰</button>
+<button id="again" class="alt">↻ เล่นอีกครั้ง</button>
+<button id="next">คำต่อไป</button>
+</div>
+<div id="menu"><h1>🔤 ฝึกภาษาอังกฤษ</h1><p>ฝึกเฉพาะชั้น ป.1 · <span id="versionTitle">เวอร์ชัน 1</span></p><p id="gradeHint" class="hint">ผสมเสียงคำสั้น 3 ตัวอักษร เช่น cat, fox, sun</p>
+<p>เลือกเกม</p>
+<div class="row" id="modes"><button class="pick" data-m="blend">ดูผสมเสียง</button><button class="pick" data-m="rhyme">คำคล้องจอง</button><button class="pick" data-m="drag">ลากเรียงคำ</button></div>
+<button id="go">▶ เริ่มเล่น</button></div>
+<script src="./word-jump-grades-3-6/three.min.js"></script>
+<script>
+const GR={
+1:{
+1:["f.o.x|🦊","b.a.t|🦇","c.a.t|🐱","d.o.g|🐶","p.i.g|🐷","s.u.n|☀️","h.e.n|🐔","b.u.s|🚌","h.a.t|🎩","b.u.g|🐞"],
+2:["m.a.p|🗺️","c.a.p|🧢","b.e.d|🛏️","l.e.g|🦵","f.i.n|🐟","s.i.t|🪑","h.o.p|🐰","p.o.t|🍲","c.u.p|🥤","r.u.g|🧶"]
+}
+};
+const RH={
+1:{
+1:[["at","m=🧘 c=🐱 b=🦇 h=🎩 r=🐀"],["ug","t=🚢 b=🐞 h=🤗 m=☕ j=🫙"]],
+2:[["ap","m=🗺️ c=🧢 t=🚰 n=😴 l=🦵"],["et","p=🐶 w=🌧️ g=🎁 j=✈️ n=🕸️"]]
+}
+};
+const SND={f:"fff",j:"juh",k:"kuh",l:"lll",m:"mmm",r:"rrr",v:"vvv",w:"wuh",y:"yuh",z:"zzz",x:"ks",ck:"kuh",ll:"lll",sh:"shh",ch:"chuh",th:"thuh",ng:"ng",ee:"ee",oo:"oo",ai:"ay",oa:"oh",ar:"ar",air:"air",a:"aah",b:"buh",c:"kuh",d:"duh",e:"eh",g:"guh",h:"huh",i:"ih",n:"nuh",o:"ah",p:"puh",s:"sss",t:"tuh",u:"uh"};
+const HUES=[8,35,52,140,190,230,280,320];
+const GRADE_GUIDE={
+1:"ป.1 • ผสมเสียงคำสั้นและฟังเสียงตัวอักษร"
+};
+const appVersion=Math.min(2,Math.max(1,Number(new URLSearchParams(location.search).get("version"))||1));
+document.getElementById("versionTitle").textContent="เวอร์ชัน "+appVersion;
+const stage=document.getElementById("stage"),cv=document.getElementById("c"),eq=document.getElementById("eq");
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(45,1,.1,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0x88aa88,.95));
+const sun=new THREE.DirectionalLight(0xffffff,.8);sun.position.set(4,8,6);scene.add(sun);
+
+// scenery
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,60),new THREE.MeshStandardMaterial({color:0x7ed957,roughness:1}));
+ground.rotation.x=-Math.PI/2;ground.position.z=-10;scene.add(ground);
+[[-9,-3,-16,5,0x5cc04a],[8,-3.5,-18,6.5,0x4fb43f],[0,-4,-22,7,0x6bcb55]].forEach(([x,y,z,r,c])=>{
+ const h=new THREE.Mesh(new THREE.SphereGeometry(r,32,16),new THREE.MeshStandardMaterial({color:c,roughness:1}));h.position.set(x,y,z);scene.add(h)});
+const cloudMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,transparent:true,opacity:.92});
+const clouds=[];
+[[-7,7,-14],[6,8.5,-16],[0,10,-20]].forEach(([x,y,z])=>{
+ const g=new THREE.Group();
+ [[0,0,1],[1,.2,.8],[-1,.1,.8],[.4,.5,.7]].forEach(([a,b,s])=>{const m=new THREE.Mesh(new THREE.SphereGeometry(s,16,12),cloudMat);m.position.set(a,b,0);g.add(m)});
+ g.position.set(x,y,z);scene.add(g);clouds.push(g)});
+
+// block texture
+function faceTex(ch,hue){
+ const s=256,c=document.createElement("canvas");c.width=c.height=s;const x=c.getContext("2d");
+ x.fillStyle=`hsl(${hue},85%,58%)`;x.fillRect(0,0,s,s);
+ const g=x.createRadialGradient(90,70,10,128,128,190);g.addColorStop(0,"rgba(255,255,255,.35)");g.addColorStop(1,"rgba(0,0,0,.12)");
+ x.fillStyle=g;x.fillRect(0,0,s,s);
+ x.fillStyle="#fff";x.font=`700 ${[0,150,118,92,74,62,54][Math.min(ch.length,6)]}px Prompt,Arial,sans-serif`;x.textAlign="center";x.textBaseline="alphabetic";
+ x.shadowColor="rgba(0,0,0,.25)";x.shadowOffsetY=6;x.fillText(ch,128,150);x.shadowColor="transparent";
+ [82,174].forEach(ex=>{x.fillStyle="#fff";x.beginPath();x.arc(ex,196,18,0,7);x.fill();x.fillStyle="#1d2b53";x.beginPath();x.arc(ex+3,198,9,0,7);x.fill()});
+ x.strokeStyle="#1d2b53";x.lineWidth=6;x.lineCap="round";x.beginPath();x.arc(128,214,16,.2,Math.PI-.2);x.stroke();
+ const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t}
+function makeBlock(ch,hue){
+ const side=new THREE.MeshStandardMaterial({color:new THREE.Color(`hsl(${hue},80%,52%)`),roughness:.45});
+ const front=new THREE.MeshStandardMaterial({map:faceTex(ch,hue),roughness:.4});
+ const geo=new THREE.BoxGeometry(1.5,1.5,1.5);geo.translate(0,.75,0);
+ const m=new THREE.Mesh(geo,[side,side,side,side,front,side]);
+ const sh=new THREE.Mesh(new THREE.CircleGeometry(.95,24),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.22}));
+ sh.rotation.x=-Math.PI/2;sh.position.y=.02;
+ const g=new THREE.Group();g.add(m,sh);g.userData={m,ch};g.visible=false;return g}
+function picSprite(emoji){
+ const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d");
+ x.font="190px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText(emoji,128,138);
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true}));sp.scale.set(.01,.01,.01);sp.position.set(0,4.1,0);return sp}
+
+// layout
+function fit(){
+ const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;
+ const d=Math.max(9,need/(2*Math.tan(cam.fov*Math.PI/360)*cam.aspect));
+ cam.position.set(0,2.6+d*.12,d);cam.lookAt(0,1.9,0);cam.updateProjectionMatrix()}
+addEventListener("resize",fit);
+
+// tween + speech
+let tok=0,blocks=[],pic=null,assembled=false,need=6.6,grade=1,mode="blend";
+const ease=p=>1-(1-p)*(1-p);
+const tw=(d,f)=>new Promise(r=>{const s=tok,t0=performance.now();(function k(n){const p=Math.min(1,(n-t0)/(d*1000));f(p);if(p<1&&s===tok)requestAnimationFrame(k);else r()})(t0)});
+const wait=d=>tw(d,()=>{});
+function say(t,rate){return new Promise(res=>{const ss=window.speechSynthesis;if(!ss)return setTimeout(res,600);
+ const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=rate||.8;u.pitch=1.05;let finished=false;
+ const done=()=>{if(finished)return;finished=true;clearTimeout(timer);res()};u.onend=done;u.onerror=done;
+ const timer=setTimeout(done,3500);ss.speak(u)})}
+async function squash(g,amt){const m=g.userData.m;await tw(.28,p=>{const k=Math.sin(p*Math.PI)*amt;m.scale.set(1+k,1-k,1+k)})}
+async function hop(g,x1,h,d){const x0=g.position.x;await tw(d,p=>{g.position.x=x0+(x1-x0)*ease(p);g.position.y=Math.sin(p*Math.PI)*h;g.userData.m.rotation.y=Math.sin(p*Math.PI*2)*.25});g.userData.m.rotation.y=0;g.position.y=0}
+
+function clear(){tok++;dr=null;drag=null;if(window.speechSynthesis)speechSynthesis.cancel();blocks.forEach(b=>scene.remove(b));if(pic)scene.remove(pic);blocks=[];pic=null;assembled=false}
+let idx=0;
+async function playBlend(){
+ clear();const s=tok,[ws,emoji]=GR[grade][appVersion][idx%=GR[grade][appVersion].length].split("|"),U=ws.split(".").map(x=>x.split(":")),L=U.map(u=>u[0]),w=L.join(""),n=L.length,gap=n>3?1.85:2.15;need=(n-1)*gap+2.3;fit();
+ eq.innerHTML="&nbsp;";
+ blocks=L.map((ch,i)=>{const g=makeBlock(ch,HUES[(idx*3+i*2)%HUES.length]);g.userData.sound=U[i][1]!==undefined?U[i][1]:(SND[ch]||ch);g.position.set(i%2?9:-9,0,0);scene.add(g);return g});
+ const xs=blocks.map((_,i)=>(i-(n-1)/2)*gap);
+ for(let i=0;i<n;i++){
+  if(s!==tok)return;const g=blocks[i];g.visible=true;
+  await hop(g,xs[i],2.4,.75);if(s!==tok)return;
+  squash(g,.28);const sd=U[i][1]!==undefined?U[i][1]:(SND[L[i]]||L[i]);if(sd)say(sd,.7);
+  eq.innerHTML=L.slice(0,i+1).map(c=>`<b>${c}</b>`).join(" + ");
+  await wait(.8)}
+ if(s!==tok)return;
+ await wait(.3);
+ const gx=blocks.map((_,i)=>(i-(n-1)/2)*1.56);
+ const slide=tw(.6,p=>blocks.forEach((g,i)=>g.position.x=xs[i]+(gx[i]-xs[i])*ease(p)));
+ await slide;if(s!==tok)return;
+ assembled=true;pic=picSprite(emoji);scene.add(pic);
+ eq.innerHTML=`${L.map(c=>`<b>${c}</b>`).join(" + ")} = <b>${w}</b>`;
+ say(w,.75);
+ tw(.7,p=>{const k=p<.7?ease(p/.7)*2.6:2.6-.4*((p-.7)/.3);pic.scale.set(k,k,k)});
+ for(let j=0;j<2;j++){await tw(.4,p=>blocks.forEach(g=>g.position.y=Math.sin(p*Math.PI)*1.1));if(s!==tok)return}
+}
+const play=()=>mode==="rhyme"?playRhyme():mode==="drag"?playDrag():playBlend();
+async function playRhyme(){
+ clear();const s=tok,F=RH[grade][appVersion][idx%RH[grade][appVersion].length],end=F[0],ons=F[1].split(" ").map(x=>x.split("="));
+ need=5.6;fit();eq.innerHTML="&nbsp;";
+ const eb=makeBlock(end,205);eb.position.set(9,0,0);eb.visible=true;scene.add(eb);blocks=[eb];
+ await hop(eb,.78,2.4,.8);if(s!==tok)return;squash(eb,.25);
+ const words=[];
+ for(let i=0;i<ons.length;i++){
+  const [on,em]=ons[i],g=makeBlock(on,HUES[(i*2+idx)%HUES.length]);g.position.set(-9,0,0);g.visible=true;scene.add(g);blocks=[eb,g];
+  await hop(g,-.78,2.4,.7);if(s!==tok)return;
+  squash(g,.25);words.push(on+end);
+  eq.innerHTML=`<b>${on}</b> + ${end} = <b>${on+end}</b>`;
+  await say(on+end,.75);if(s!==tok)return;
+  pic=picSprite(em);scene.add(pic);assembled=true;
+  tw(.5,p=>{const k=ease(p)*2.6;pic.scale.set(k,k,k)});
+  await wait(1.3);if(s!==tok)return;
+  assembled=false;scene.remove(pic);pic=null;
+  await tw(.3,p=>{g.position.y=p*3;g.userData.m.scale.setScalar(1-p)});if(s!==tok)return;scene.remove(g)}
+ blocks=[eb];eq.innerHTML=words.map(x=>`<b>${x}</b>`).join(" • ")+"<br>คล้องจองกัน!";
+}
+document.getElementById("again").onclick=play;
+document.getElementById("next").onclick=()=>{if(mode==="drag"&&solved>=10){idx=0;stars=0;attempts=0;solved=0}else idx++;play()};
+const menu=document.getElementById("menu");
+function mark(){document.querySelectorAll("#modes .pick").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===mode));document.getElementById("gradeHint").textContent=GRADE_GUIDE[grade]}
+function updateLevelInfo(){const el=document.getElementById("levelInfo");el.textContent=(GRADE_GUIDE[grade]||"")+" · เวอร์ชัน "+appVersion}
+document.querySelectorAll("#modes .pick").forEach(b=>b.onclick=()=>{mode=b.dataset.m;mark()});
+document.getElementById("go").onclick=()=>{menu.classList.add("hide");idx=0;stars=0;attempts=0;solved=0;updateLevelInfo();play()};
+document.getElementById("menuBtn").onclick=()=>{clear();eq.innerHTML="&nbsp;";menu.classList.remove("hide")};
+mark();
+
+// tap a block to hear its sound
+const ray=new THREE.Raycaster(),mp=new THREE.Vector2();
+cv.addEventListener("pointerdown",e=>{if(mode==="drag")return;
+ const r=cv.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+ ray.setFromCamera(mp,cam);const hit=ray.intersectObjects(blocks.filter(b=>b.visible).map(b=>b.userData.m))[0];
+ if(hit){const g=hit.object.parent;if(window.speechSynthesis)speechSynthesis.cancel();if(g.userData.sound)say(g.userData.sound,.7);
+  const s=tok;tw(.35,p=>{g.position.y=Math.sin(p*Math.PI)*.9})}});
+
+// loop
+let dr=null,drag=null,stars=0,attempts=0,solved=0;
+const gp=new THREE.Plane(new THREE.Vector3(0,1,0),0),hp=new THREE.Vector3();
+const hud=m=>{eq.innerHTML=`${m}<br><small style="font-size:.55em">⭐ ${stars}　ถูก ${solved}/10　ลอง ${attempts}</small>`};
+function aim(e){const r=cv.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(mp,cam)}
+function gpt(e){aim(e);return ray.ray.intersectPlane(gp,hp)}
+async function playDrag(){
+ clear();const s=tok,[ws,emoji]=GR[grade][appVersion][idx%=GR[grade][appVersion].length].split("|"),U=ws.split(".").map(x=>x.split(":")),L=U.map(u=>u[0]),w=L.join(""),n=L.length,gap=n>3?1.85:2.15;
+ need=((n-1)*gap+1.8)*1.55;fit();
+ const xs=L.map((_,i)=>(i-(n-1)/2)*gap);
+ const slots=xs.map(x=>{const g=new THREE.Group(),mk=(sz,c,o)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(sz,sz),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o}));m.rotation.x=-Math.PI/2;return m};const a=mk(1.9,0xffd23f,1),b=mk(1.6,0x0b1b6b,.9);b.position.y=.04;g.add(a,b);g.position.set(x,.03,4);scene.add(g);return g});
+ const order=L.map((_,i)=>i).sort(()=>Math.random()-.5);
+ const tray=order.map((k,j)=>{const g=makeBlock(L[k],HUES[(idx*3+k*2)%HUES.length]);g.userData.sound=U[k][1]!==undefined?U[k][1]:(SND[L[k]]||L[k]);g.userData.k=k;g.userData.home=new THREE.Vector3((j-(n-1)/2)*gap*.95,0,-1.2);g.position.copy(g.userData.home);g.visible=true;scene.add(g);return g});
+ blocks=[...tray,...slots];
+ pic=picSprite(emoji);pic.scale.set(2.2,2.2,2.2);scene.add(pic);assembled=true;
+ dr={L,U,w,xs,fill:[],placed:0,done:false};
+ hud("ลากตัวอักษรมาเรียงคำให้ถูกต้อง");say(w,.75);
+}
+cv.addEventListener("pointerdown",e=>{
+ if(mode!=="drag"||!dr||dr.done)return;
+ aim(e);const hit=ray.intersectObjects(blocks.filter(b=>b.userData.m&&!b.userData.lock).map(b=>b.userData.m))[0];
+ if(!hit)return;const g=hit.object.parent,p=gpt(e);if(!p)return;
+ drag={g,dx:g.position.x-p.x,dz:g.position.z-p.z};cv.setPointerCapture(e.pointerId);g.position.y=.6;
+ const k=g.userData.k,sd=dr.U[k][1]!==undefined?dr.U[k][1]:(SND[dr.L[k]]||dr.L[k]);
+ if(window.speechSynthesis)speechSynthesis.cancel();if(sd)say(sd,.7)});
+cv.addEventListener("pointermove",e=>{if(!drag)return;const p=gpt(e);if(p){drag.g.position.x=p.x+drag.dx;drag.g.position.z=p.z+drag.dz}});
+const rel=()=>{if(!drag)return;const g=drag.g;drag=null;drop(g)};
+cv.addEventListener("pointerup",rel);cv.addEventListener("pointercancel",rel);
+async function drop(g){
+ if(!dr)return;const s=tok,u=g.userData;g.position.y=0;
+ let b=-1,bd=2.2;dr.xs.forEach((x,j)=>{if(dr.fill[j])return;const d=Math.hypot(g.position.x-x,g.position.z-4);if(d<bd){bd=d;b=j}});
+ const x0=g.position.x,z0=g.position.z;
+ if(b>=0&&dr.L[b]===u.ch){
+  dr.fill[b]=1;u.lock=1;
+  await tw(.18,p=>{g.position.x=x0+(dr.xs[b]-x0)*p;g.position.z=z0+(4-z0)*p});if(s!==tok)return;
+  squash(g,.28);
+  if(++dr.placed===dr.L.length)win();
+ }else{
+  attempts++;hud("ยังไม่ตรง ลองฟังเสียงแล้วเรียงใหม่");
+  const h=u.home;
+  await tw(.35,p=>{g.position.x=x0+(h.x-x0)*ease(p);g.position.z=z0+(h.z-z0)*ease(p);u.m.rotation.z=Math.sin(p*Math.PI*4)*.25*(1-p)});u.m.rotation.z=0}
+}
+async function win(){
+ const s=tok;dr.done=true;stars++;solved++;
+ hud(`${dr.L.map(c=>`<b>${c}</b>`).join(" + ")} = <b>${dr.w}</b><br>เก่งมาก! อ่านคำเต็มตามเสียง`);
+ say(dr.w,.75);tw(.6,p=>{const k=2.2+ease(p)*.6;pic.scale.set(k,k,k)});
+ const m=picSprite("⭐").material.map,arr=[];
+ for(let i=0;i<16;i++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:m,transparent:true}));sp.scale.set(.7,.7,.7);scene.add(sp);blocks.push(sp);arr.push([sp,(Math.random()-.5)*8,3+Math.random()*3,Math.random()*2-.5])}
+ tw(1.3,p=>{const t=p*1.3;arr.forEach(([sp,vx,vy,vz])=>sp.position.set(vx*t,2.4+vy*t-4*t*t,vz*t))});
+ for(let j=0;j<2;j++){await tw(.4,p=>blocks.forEach(g=>{if(g.userData.m)g.position.y=Math.sin(p*Math.PI)*1.1}));if(s!==tok)return}
+ await wait(1.2);if(s!==tok)return;
+ if(solved>=10){dr.done=true;if(window.parent!==window)window.parent.postMessage({type:"english-adventure-phonics-result",grade:grade,version:appVersion,correct:solved,total:10,attempts:attempts,score:Math.round(solved/10*100)},location.origin);hud(`ครบ 10 คำแล้ว! ได้ ⭐ ${stars} ดวง<br>ทบทวนคำที่ยังไม่คล่องกับคุณครู`);return}
+ idx++;playDrag();
+}
+const clock=new THREE.Clock();
+(function loop(){const t=clock.getElapsedTime();
+ clouds.forEach((c,i)=>c.position.x+=Math.sin(t*.2+i)*.003);
+ if(assembled&&pic)pic.position.y=4.1+Math.sin(t*2.5)*.12;
+ renderer.render(scene,cam);requestAnimationFrame(loop)})();
+fit();
+</script>
+</body>
+</html>

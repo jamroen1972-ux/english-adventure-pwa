@@ -160,6 +160,12 @@
   #wordJumpOverlay{position:fixed;inset:0;z-index:10051;display:flex;flex-direction:column;background:#f5f7fc}
   #wordJumpOverlay[hidden]{display:none!important}
 </style>
+<style>
+  #phonics3DOverlay{position:fixed;inset:0;z-index:10052;display:flex;flex-direction:column;background:#f5f7fc}
+  #phonics3DOverlay[hidden]{display:none!important}
+  #phonics3DFrame{width:100%;flex:1;min-height:0;border:0;background:#dff2ff}
+  @media(max-width:520px){#phonics3DOverlay .animal-words-bar{gap:8px;padding-left:9px;padding-right:9px}#phonics3DOverlay .animal-words-bar strong{font-size:13px}}
+</style>
 </head>
 <body>
 <div class="intro-video-overlay" id="introVideoOverlay" role="dialog" aria-label="วิดีโอแนะนำ English Adventure" tabindex="0"><video class="intro-video-player" id="introVideoPlayer" autoplay playsinline preload="auto" poster="./home-intro-poster.jpg" aria-label="วิดีโอแนะนำแอป English Adventure"><source src="./home-intro.mp4" type="video/mp4"></video><div class="intro-start-hint" aria-hidden="true">แตะหน้าจอเพื่อเริ่มเรียน</div></div>
@@ -178,7 +184,7 @@
     <div class="panel daily-timer"><div style="font-size:34px">⏱️</div><div class="daily-timer-copy"><h3>เป้าหมายการเรียนวันนี้</h3><strong id="studyTimeLabel">0:00 / 60:00 นาที</strong><div class="timer-track"><i id="studyTimeBar"></i></div><p class="install-hint" id="studyTimeNote">เวลาจะนับตอนอยู่ในหน้าบทเรียนและกิจกรรม</p></div></div>
     <section class="special-tools"><div class="section-head"><div><h2>เมนูพิเศษ</h2><p>เครื่องมือช่วยสื่อสาร แยกจากบทเรียน</p></div></div><button class="special-tool-card" type="button" onclick="showView('interpreterView')"><span class="special-tool-icon">🗣️</span><span class="special-tool-copy"><em>ENGLISH ADVENTURE · SPECIAL</em><strong>ล่ามแปลภาษา</strong><small>คุยกันสองฝ่ายด้วยเสียงและแปลให้อัตโนมัติ</small></span><span class="special-tool-arrow" aria-hidden="true">›</span></button></section>
   </section>
-  <section class="view" id="lessonsView"><div class="section-head"><div><h2>บทเรียน <span id="courseGradeTitle">ป.2</span></h2><p id="courseTrackNote">เลือกเรื่องที่อยากเรียนวันนี้ได้เลย</p></div></div><div class="panel" id="versionPanel" style="margin-bottom:16px"></div><div id="alphabetEntry"></div><div class="unit-grid" id="allUnits"></div>
+  <section class="view" id="lessonsView"><div class="section-head"><div><h2>บทเรียน <span id="courseGradeTitle">ป.2</span></h2><p id="courseTrackNote">เลือกเรื่องที่อยากเรียนวันนี้ได้เลย</p></div></div><div class="panel" id="versionPanel" style="margin-bottom:16px"></div><div id="alphabetEntry"></div><div id="phonics3DEntry"></div><div class="unit-grid" id="allUnits"></div>
   <section class="animal-words-section" id="animalWordsSection" hidden>
     <div class="section-head"><div><h2>เกมเสริมท้ายบทเรียน</h2><p>แนะนำสำหรับ ป.1–ป.3 · เหมาะที่สุดกับ ป.1–ป.2</p></div></div>
     <article class="unit animal-words-card">
@@ -210,7 +216,7 @@
 <div class="eye-break-overlay" id="eyeBreakOverlay" aria-hidden="true" role="dialog" aria-label="พักสายตา"><div class="eye-break-card"><div class="eye-break-icon">🌳</div><p class="eyebrow">พักสายตาสักครู่นะคะ</p><h2>มองไปไกล ๆ</h2><p>มองสิ่งที่อยู่ห่างประมาณ 6 เมตร เพื่อพักสายตา</p><div class="eye-break-count" id="eyeBreakCountdown">20</div><p>วินาที แล้วกลับมาเรียนต่อกันค่ะ</p></div></div>
 <script src="./courses.js"></script>
 <script src="./app.js"></script>
-<script src="./learning-plus.js?v=20261114-checkfix"></script>
+<script src="./learning-plus.js?v=20261114-phonics3d"></script>
 
 
 <div id="animalWordsOverlay" hidden aria-hidden="true">
@@ -221,7 +227,12 @@
   <div class="animal-words-bar"><button class="animal-words-back" type="button" onclick="closeWordJump()">← กลับบทเรียน</button><strong>ลูกบอลกระโดด · Word Jump ป.3–ป.6</strong></div>
   <iframe id="wordJumpFrame" title="เกมลูกบอลกระโดด Word Jump ป.3–ป.6" allow="autoplay; fullscreen" allowfullscreen></iframe>
 </div>
+<div id="phonics3DOverlay" hidden aria-hidden="true">
+  <div class="animal-words-bar"><button class="animal-words-back" type="button" onclick="closePhonics3D()">← กลับบทเรียน</button><strong id="phonics3DTitle">เกมผสมเสียง 3D</strong></div>
+  <iframe id="phonics3DFrame" title="เกมผสมเสียง 3D ภาษาอังกฤษ" allow="autoplay; fullscreen" allowfullscreen></iframe>
+</div>
 </body>
 </html>
+
 
 
