@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ลูกบอลกระโดด · Word Jump ป.3-ป.6</title>
+<style>
+:root{--bg:#cfe6ff;--fg:#1c2a44;--card:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a2140;--fg:#e8eefc;--card:#26305a}}
+:root[data-theme="dark"]{--bg:#1a2140;--fg:#e8eefc;--card:#26305a}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);font-size:20px;font-weight:700;padding:6px 14px;border-radius:16px;background:rgba(0,0,0,.4);color:#fff;pointer-events:none}
+#sc{left:12px}#pg{right:12px}
+#fb{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 62px);max-width:92%;text-align:center;font-size:22px;font-weight:700;padding:8px 18px;border-radius:18px;color:#fff;display:none;pointer-events:none;box-sizing:border-box}
+#fb.ok{background:#2fa863}#fb.no{background:#d6453d}
+#opts{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;gap:10px}
+.opt{flex:1;min-width:0;padding:0 4px;white-space:normal;line-height:1.1;overflow:hidden;height:74px;border:0;border-radius:20px;font-size:clamp(20px,6vw,30px);font-weight:800;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.25);opacity:.4;transition:opacity .15s;touch-action:manipulation;font-family:inherit}
+.opt:nth-child(1){background:#3b82f6}.opt:nth-child(2){background:#f59e0b}.opt:nth-child(3){background:#ec4899}
+.opt.on{opacity:1}.opt.good{background:#2fa863!important;opacity:1}.opt.bad{background:#d6453d!important;opacity:1}
+#panel{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);width:min(88%,380px);background:var(--card);color:var(--fg);border-radius:24px;padding:22px 20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.35);box-sizing:border-box}
+#panel h1{margin:0 0 8px;font-size:30px}
+#panel p{margin:6px 0;font-size:17px;line-height:1.45}
+.go{margin-top:12px;border:0;border-radius:18px;padding:12px 30px;font-size:22px;font-weight:800;background:#2fa863;color:#fff;font-family:inherit}
+.chip{border:2px solid #3b82f6;background:transparent;color:var(--fg);border-radius:16px;padding:8px 12px;margin:4px;font-size:16px;font-weight:700;font-family:inherit}.chip.sel{background:#3b82f6;color:#fff}
+#hint{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 100px);text-align:center;font-size:44px;font-weight:800;letter-spacing:4px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);pointer-events:none;white-space:pre}#hint:empty{display:none}
+#rp{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 110px);width:60px;height:60px;border-radius:50%;border:0;background:#3b82f6;color:#fff;font-size:28px;display:none;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud" id="sc">⭐ 0</div>
+<div class="hud" id="pg">0/10</div>
+<div id="fb"></div>
+<div id="opts"><button class="opt"></button><button class="opt"></button><button class="opt"></button></div>
+<div id="hint"></div>
+<button id="rp">🔊</button>
+<div id="panel"></div>
+<script src="./three.min.js"></script>
+<script>
+const TOTAL=10,PASS=8;
+const CATS={
+g3_1:{n:'ของใช้',d:[["BOOK","หนังสือ","📖"],["PENCIL","ดินสอ","✏️"],["BAG","กระเป๋า","🎒"],["CLOCK","นาฬิกา","🕐"],["UMBRELLA","ร่ม","☂️"],["KEY","กุญแจ","🔑"],["PHONE","โทรศัพท์","📱"],["SCISSORS","กรรไกร","✂️"],["COMPUTER","คอมพิวเตอร์","💻"],["CAMERA","กล้องถ่ายรูป","📷"]]},
+g3_2:{n:'เสื้อผ้า',d:[["SHIRT","เสื้อเชิ้ต","👕"],["PANTS","กางเกง","👖"],["DRESS","ชุดกระโปรง","👗"],["SHOES","รองเท้า","👟"],["HAT","หมวก","🧢"],["SOCKS","ถุงเท้า","🧦"],["GLOVES","ถุงมือ","🧤"],["SCARF","ผ้าพันคอ","🧣"],["COAT","เสื้อโค้ท","🧥"],["GLASSES","แว่นตา","👓"]]},
+g3_3:{n:'อาหาร',d:[["EGG","ไข่","🥚"],["CAKE","เค้ก","🍰"],["PIZZA","พิซซ่า","🍕"],["BURGER","เบอร์เกอร์","🍔"],["COOKIE","คุกกี้","🍪"],["CARROT","แครอท","🥕"],["CORN","ข้าวโพด","🌽"],["TOMATO","มะเขือเทศ","🍅"],["POTATO","มันฝรั่ง","🥔"],["SANDWICH","แซนด์วิช","🥪"]]},
+g3_4:{n:'ในบ้าน',d:[["BED","เตียง","🛏️"],["CHAIR","เก้าอี้","🪑"],["DOOR","ประตู","🚪"],["WINDOW","หน้าต่าง","🪟"],["SOFA","โซฟา","🛋️"],["TOILET","ส้วม","🚽"],["SHOWER","ฝักบัว","🚿"],["BATHTUB","อ่างอาบน้ำ","🛁"],["MIRROR","กระจก","🪞"],["TELEVISION","โทรทัศน์","📺"]]},
+g4_1:{n:'อาชีพ',d:[["DOCTOR","หมอ","👨‍⚕️"],["NURSE","พยาบาล","👩‍⚕️"],["TEACHER","ครู","🧑‍🏫"],["FARMER","ชาวนา","🧑‍🌾"],["POLICE OFFICER","ตำรวจ","👮"],["COOK","พ่อครัว","🧑‍🍳"],["PILOT","นักบิน","🧑‍✈️"],["ARTIST","ศิลปิน","🧑‍🎨"],["SINGER","นักร้อง","🧑‍🎤"],["FIREFIGHTER","นักดับเพลิง","🧑‍🚒"]]},
+g4_2:{n:'สถานที่',d:[["HOSPITAL","โรงพยาบาล","🏥"],["SCHOOL","โรงเรียน","🏫"],["BANK","ธนาคาร","🏦"],["HOTEL","โรงแรม","🏨"],["TEMPLE","วัด","🛕"],["CASTLE","ปราสาท","🏰"],["FACTORY","โรงงาน","🏭"],["STORE","ร้านค้า","🏪"],["STADIUM","สนามกีฬา","🏟️"],["CHURCH","โบสถ์","⛪"]]},
+g4_3:{n:'ดนตรี/ศิลปะ',d:[["GUITAR","กีตาร์","🎸"],["PIANO","เปียโน","🎹"],["DRUM","กลอง","🥁"],["VIOLIN","ไวโอลิน","🎻"],["TRUMPET","แตร","🎺"],["MICROPHONE","ไมโครโฟน","🎤"],["PALETTE","จานสี","🎨"],["MASK","หน้ากาก","🎭"],["BALLOON","ลูกโป่ง","🎈"],["GIFT","ของขวัญ","🎁"]]},
+g4_4:{n:'สัตว์ป่า/ทะเล',d:[["TIGER","เสือ","🐯"],["GIRAFFE","ยีราฟ","🦒"],["ZEBRA","ม้าลาย","🦓"],["KANGAROO","จิงโจ้","🦘"],["PANDA","แพนด้า","🐼"],["DOLPHIN","โลมา","🐬"],["WHALE","วาฬ","🐳"],["TURTLE","เต่า","🐢"],["SNAKE","งู","🐍"],["BUTTERFLY","ผีเสื้อ","🦋"]]},
+g5_1:{n:'พาหนะ',d:[["AIRPLANE","เครื่องบิน","✈️"],["TRAIN","รถไฟ","🚆"],["BOAT","เรือ","⛵"],["BICYCLE","จักรยาน","🚲"],["HELICOPTER","เฮลิคอปเตอร์","🚁"],["MOTORCYCLE","มอเตอร์ไซค์","🏍️"],["TRUCK","รถบรรทุก","🚚"],["TAXI","แท็กซี่","🚕"],["AMBULANCE","รถพยาบาล","🚑"],["BUS","รถบัส","🚌"]]},
+g5_2:{n:'อากาศ/ท้องฟ้า',d:[["RAINY","ฝนตก","🌧️"],["SUNNY","แดดออก","☀️"],["WINDY","ลมแรง","💨"],["SNOWY","หิมะตก","❄️"],["CLOUDY","เมฆมาก","☁️"],["STORMY","พายุ","⛈️"],["RAINBOW","รุ้ง","🌈"],["MOON","ดวงจันทร์","🌙"],["STAR","ดวงดาว","⭐"],["SNOWMAN","ตุ๊กตาหิมะ","⛄"]]},
+g5_3:{n:'ธรรมชาติ',d:[["TREE","ต้นไม้","🌳"],["FLOWER","ดอกไม้","🌸"],["LEAF","ใบไม้","🍃"],["CACTUS","กระบองเพชร","🌵"],["MUSHROOM","เห็ด","🍄"],["BEACH","ชายหาด","🏖️"],["DESERT","ทะเลทราย","🏜️"],["WAVE","คลื่น","🌊"],["FIRE","ไฟ","🔥"],["ISLAND","เกาะ","🏝️"]]},
+g5_4:{n:'กีฬา/เกม',d:[["FOOTBALL","ฟุตบอล","⚽"],["BASKETBALL","บาสเกตบอล","🏀"],["VOLLEYBALL","วอลเลย์บอล","🏐"],["BASEBALL","เบสบอล","⚾"],["TROPHY","ถ้วยรางวัล","🏆"],["MEDAL","เหรียญรางวัล","🏅"],["SKATEBOARD","สเกตบอร์ด","🛹"],["TARGET","เป้าหมาย","🎯"],["KITE","ว่าว","🪁"],["DICE","ลูกเต๋า","🎲"]]},
+g6_1:{n:'วิทยาศาสตร์',d:[["MICROSCOPE","กล้องจุลทรรศน์","🔬"],["TELESCOPE","กล้องโทรทรรศน์","🔭"],["MAGNET","แม่เหล็ก","🧲"],["BATTERY","แบตเตอรี่","🔋"],["ROCKET","จรวด","🚀"],["PLANET","ดาวเคราะห์","🪐"],["SATELLITE","ดาวเทียม","🛰️"],["ATOM","อะตอม","⚛️"],["LIGHTBULB","หลอดไฟ","💡"],["THERMOMETER","ปรอทวัดไข้","🌡️"]]},
+g6_2:{n:'โลกและจักรวาล',d:[["VOLCANO","ภูเขาไฟ","🌋"],["MOUNTAIN","ภูเขา","⛰️"],["GLOBE","ลูกโลก","🌍"],["TORNADO","พายุทอร์นาโด","🌪️"],["DIAMOND","เพชร","💎"],["COMET","ดาวหาง","☄️"],["GALAXY","ดาราจักร","🌌"],["SUNRISE","พระอาทิตย์ขึ้น","🌅"],["FOUNTAIN","น้ำพุ","⛲"],["BRIDGE","สะพาน","🌉"]]},
+g6_3:{n:'ร่างกาย/สุขภาพ',d:[["HEART","หัวใจ","🫀"],["BRAIN","สมอง","🧠"],["BONE","กระดูก","🦴"],["LUNGS","ปอด","🫁"],["TOOTH","ฟัน","🦷"],["EAR","หู","👂"],["MEDICINE","ยา","💊"],["SYRINGE","เข็มฉีดยา","💉"],["BANDAGE","ผ้าพันแผล","🩹"],["STETHOSCOPE","หูฟังแพทย์","🩺"]]},
+g6_4:{n:'ครัวและอาหาร',d:[["CHOPSTICKS","ตะเกียบ","🥢"],["SPOON","ช้อน","🥄"],["KNIFE","มีด","🔪"],["BOWL","ชาม","🥣"],["PLATE","จาน","🍽️"],["TEAPOT","กาน้ำชา","🫖"],["SALAD","สลัด","🥗"],["NOODLES","ก๋วยเตี๋ยว","🍜"],["SUSHI","ซูชิ","🍣"],["PANCAKES","แพนเค้ก","🥞"]]}
+};
+let POOL=[],cat='g3_1',grade='3',mode='word',ans='';
+const hint=document.getElementById('hint'),rp=document.getElementById('rp');
+rp.addEventListener('click',()=>say(q[0].toLowerCase()));
+const dark=matchMedia('(prefers-color-scheme: dark)').matches;
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+const sky=dark?0x1a2140:0xcfe6ff;
+scene.background=new THREE.Color(sky);scene.fog=new THREE.Fog(sky,18,48);
+const camera=new THREE.PerspectiveCamera(55,1,0.1,100);
+camera.position.set(0,3.4,6);camera.lookAt(0,1.4,-6);
+scene.add(new THREE.HemisphereLight(0xffffff,0x8899bb,0.95));
+const sun=new THREE.DirectionalLight(0xffffff,0.7);sun.position.set(3,8,4);scene.add(sun);
+const ground=new THREE.Mesh(new THREE.BoxGeometry(6,0.4,90),new THREE.MeshStandardMaterial({color:0x7ccf8a}));
+ground.position.set(0,-0.2,-38);scene.add(ground);
+const posts=[];
+for(let i=0;i<10;i++){[-3.6,3.6].forEach(x=>{
+  const p=new THREE.Mesh(new THREE.BoxGeometry(0.5,1.2,0.5),new THREE.MeshStandardMaterial({color:0xffd166}));
+  p.position.set(x,0.6,-i*6);scene.add(p);posts.push(p);
+});}
+const R=0.5;
+const ball=new THREE.Group();
+const body=new THREE.Mesh(new THREE.SphereGeometry(R,32,24),new THREE.MeshStandardMaterial({color:0xff8a3d,roughness:.4}));
+body.add(new THREE.Mesh(new THREE.TorusGeometry(R*1.01,0.05,8,32),new THREE.MeshStandardMaterial({color:0xffffff})));
+const roll=new THREE.Group();roll.add(body);ball.add(roll);
+[-0.18,0.18].forEach(x=>{
+  const e=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,12),new THREE.MeshStandardMaterial({color:0xffffff}));
+  e.position.set(x,0.2,-R*0.82);ball.add(e);
+  const p=new THREE.Mesh(new THREE.SphereGeometry(0.055,12,10),new THREE.MeshStandardMaterial({color:0x111111}));
+  p.position.set(x,0.2,-R*0.82-0.1);ball.add(p);
+});
+scene.add(ball);
+const shadow=new THREE.Mesh(new THREE.CircleGeometry(0.55,24),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.3}));
+shadow.rotation.x=-Math.PI/2;shadow.position.y=0.02;scene.add(shadow);
+
+// animal picture
+const animal=new THREE.Sprite(new THREE.SpriteMaterial({fog:false,transparent:true}));
+animal.scale.set(2.4,2.4,1);animal.visible=false;scene.add(animal);
+const texCache={};
+function tex(a){
+  const K=a[0]+a[2];if(texCache[K])return texCache[K];
+  const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
+  g.fillStyle='#fff';g.beginPath();g.arc(128,128,118,0,7);g.fill();
+  g.lineWidth=10;g.strokeStyle='#ffd166';g.stroke();
+  g.font='140px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+  g.textAlign='center';g.textBaseline='middle';
+  if(a[2][0]==='#'){g.fillStyle=a[2];g.beginPath();g.arc(128,128,92,0,7);g.fill();g.lineWidth=6;g.strokeStyle='rgba(0,0,0,.2)';g.stroke()}
+  else if(/^\d+$/.test(a[2])){g.font='bold 150px system-ui,sans-serif';g.fillStyle='#e5484d';g.fillText(a[2],128,140)}
+  else g.fillText(a[2],128,140);
+  return texCache[K]=new THREE.CanvasTexture(c);
+}
+// star burst
+const starGeo=new THREE.OctahedronGeometry(0.22);
+const pMats=[0xffd60a,0xff5fa2,0x4cc9f0,0x7CFC00].map(c=>new THREE.MeshBasicMaterial({color:c}));
+let parts=[];
+function burst(x,y,z){
+  for(let i=0;i<28;i++){
+    const m=new THREE.Mesh(starGeo,pMats[i%4]);m.position.set(x,y,z);scene.add(m);
+    const a=Math.random()*6.283,sp=3+Math.random()*4;
+    parts.push({m,vx:Math.cos(a)*sp,vy:2+Math.random()*5,vz:Math.sin(a)*sp*.6+1,life:1});
+  }
+}
+
+// sound
+let actx=null;
+function beep(f,d,type,slide,vol,delay){
+  if(!actx)return;
+  try{
+    const o=actx.createOscillator(),g=actx.createGain(),n=actx.currentTime+(delay||0);
+    o.type=type||'sine';o.frequency.setValueAtTime(f,n);
+    if(slide)o.frequency.exponentialRampToValueAtTime(slide,n+d);
+    g.gain.setValueAtTime(vol||0.2,n);g.gain.exponentialRampToValueAtTime(0.001,n+d);
+    o.connect(g);g.connect(actx.destination);o.start(n);o.stop(n+d+0.02);
+  }catch(e){}
+}
+function bell(){[1318,1760,2637].forEach((f,i)=>beep(f,1.0-i*.2,'sine',0,.14-i*.03));beep(1568,.8,'sine',0,.1,.12)}
+function say(w){
+  try{speechSynthesis.cancel();(Array.isArray(w)?w:[w]).filter(Boolean).forEach(t=>{const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.85;speechSynthesis.speak(u)})}catch(e){}
+}
+
+// game state
+let state='ready',h=0,vy=0,sq=0,qs=[],qi=0,score=0,right=0,missed=[],q=null,armed=false,fT=0,isRight=false,shown=false,pt=0,best=0;
+function fitOpts(){const L=Math.max(1,...opts.flatMap(b=>b.textContent.split(' ')).map(t=>t.length));const w=(innerWidth-40)/3-8;opts.forEach(b=>b.style.fontSize=Math.max(12,Math.min(30,w/(L*0.68)))+'px')}
+function praise(){const p=['Great job!','Well done!','Excellent!','Very good!','Awesome!'];return p[Math.floor(Math.random()*p.length)]}
+function sentence(){const w=q[0].toLowerCase();if(['rainy','sunny','windy','snowy','cloudy','stormy'].includes(w))return 'It is '+w+' today.';if(w.endsWith('s')&&w!=='bus')return 'These are '+w+'.';return 'This is '+('aeiou'.includes(w[0])?'an ':'a ')+w+'.'}
+function bk(){return 'best_'+cat+'_'+mode}
+function loadBest(){best=0;try{best=+localStorage.getItem(bk())||0}catch(e){}}
+const sc=document.getElementById('sc'),pg=document.getElementById('pg'),fb=document.getElementById('fb'),panel=document.getElementById('panel'),opts=[...document.querySelectorAll('.opt')];
+menu();
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function startGame(){
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume()}catch(e){}
+  POOL=CATS[cat].d;qs=shuffle(POOL).slice(0,TOTAL);qi=0;score=0;right=0;missed=[];
+  sc.textContent='⭐ 0';panel.style.display='none';fb.style.display='none';
+  nextQ();
+}
+function nextQ(){
+  if(qi>=TOTAL){finish();return}
+  q=qs[qi];rp.style.display=mode==='listen'?'block':'none';pg.textContent=(qi+1)+'/'+TOTAL;
+  let choices;
+  if(mode==='spell'){
+    const idx=[...q[0]].map((c,i)=>c===' '?-1:i).filter(i=>i>=0);const p=idx[Math.floor(Math.random()*idx.length)];ans=q[0][p];
+    hint.textContent=q[0].split('').map((c,i)=>i===p?'_':c===' '?'/':c).join(' ');hint.style.fontSize=Math.max(16,Math.min(44,((innerWidth-24)/q[0].length-8)/0.95))+'px';
+    const set='AEIOU'.includes(ans)?'AEIOU':'BCDFGHKLMNPRSTVWY';
+    choices=shuffle([ans,...shuffle(set.split('').filter(c=>c!==ans)).slice(0,2)]);
+  }else{
+    ans=q[0];hint.textContent='';
+    choices=shuffle([q[0],...shuffle(POOL.filter(a=>a!==q)).slice(0,2).map(a=>a[0])]);
+  }
+  opts.forEach((b,i)=>{b.textContent=choices[i];b.dataset.w=choices[i];b.className='opt'});fitOpts();
+  animal.material.map=tex(mode==='listen'?['?','','❓']:q);animal.material.opacity=1;animal.material.needsUpdate=true;
+  animal.position.set(0,2.1,-28);animal.visible=true;armed=false;state='ask';
+}
+function answer(i){
+  if(state!=='ask'||!armed)return;
+  animal.material.map=tex(q);animal.material.needsUpdate=true;armed=false;isRight=opts[i].dataset.w===ans;if(mode==='spell')hint.textContent=q[0].split('').map(c=>c===' '?'/':c).join(' ');
+  if(h<=0.001){vy=9.5;beep(300,0.15,'square',600,0.12)}
+  opts.forEach(b=>{b.classList.remove('on');if(b.dataset.w===ans)b.classList.add('good')});
+  if(!isRight)opts[i].classList.add('bad');
+  fT=0;shown=false;state='fly';
+}
+function hit(){
+  animal.visible=false;burst(0,2.1,0);bell();
+  score+=10;right++;sc.textContent='⭐ '+score;
+  say(mode==='spell'?[praise(),q[0].replace(/ /g,'').split('').join(', '),q[0].toLowerCase()]:[praise(),q[0].toLowerCase(),sentence()]);showFb(true,'✅ '+q[0]+' = '+q[1]+' · เก่งมาก! +10');
+  state='pause';pt=1.7;
+}
+function miss(){
+  beep(220,.35,'triangle',140,.2);say(['Good try!',q[0].toLowerCase()]);missed.push(q);
+  showFb(false,'ยังไม่ใช่ · คำตอบคือ '+q[0]+' = '+q[1]);
+}
+function showFb(ok,t){fb.className=ok?'ok':'no';fb.textContent=t;fb.style.display='block'}
+function finish(){
+  state='over';animal.visible=false;hint.textContent='';rp.style.display='none';opts.forEach(b=>b.className='opt');fb.style.display='none';
+  const st=right>=PASS?3:right>=5?2:right>=1?1:0;
+  if(score>best){best=score;try{localStorage.setItem(bk(),best)}catch(e){}}
+  const msg=right>=PASS?'เก่งมาก! 🎉':right>=5?'ดีมาก! สู้ต่อไป 💪':'ไม่เป็นไร ลองใหม่อีกครั้งนะ 😊';
+  panel.innerHTML='<h1>จบเกม!</h1><p style="font-size:34px;margin:0">'+(st?'⭐'.repeat(st):'💪')+'</p><p><b>ถูก '+right+'/'+TOTAL+' ข้อ · '+score+' คะแนน</b></p><p>'+msg+'</p><p style="font-size:20px;font-weight:800;color:'+(right>=PASS?'#2fa863':'#d6453d')+'">'+(right>=PASS?'ผ่าน ✅':'ยังไม่ผ่าน ❌')+'</p><p style="font-size:13px;opacity:.7">เกณฑ์ผ่าน: ถูกอย่างน้อย '+PASS+' จาก '+TOTAL+' ข้อ</p>'
+   +(missed.length?'<p style="font-size:15px">ทบทวนคำที่พลาด: '+missed.map(m=>(m[2][0]==='#'?'🎨':/^\d+$/.test(m[2])?'':m[2])+' '+m[0]+' = '+m[1]).join(' · ')+'</p>':'')
+   +'<p style="font-size:14px;opacity:.7">คะแนนสูงสุด '+best+'</p><button class="go" data-a="go">เล่นอีกครั้ง</button><button class="go" data-a="menu" style="background:#3b82f6;margin-left:8px">เปลี่ยนหมวด</button>';
+  panel.style.display='block';
+  
+  say('You got '+right+' out of '+TOTAL+'. '+(right>=PASS?'Great job! You passed!':right>=5?'Good job!':'Keep trying!'));
+  if(right>=5)[523,659,784,1047].forEach((f,i)=>beep(f,.3,'triangle',0,.18,i*.14));
+}
+function menu(){
+  loadBest();
+  panel.innerHTML='<h1>Word Jump ป.3–ป.6</h1><p>เลือกชั้น</p><div>'+['3','4','5','6'].map(g=>'<button class="chip'+(g===grade?' sel':'')+'" data-grade="'+g+'">ป.'+g+'</button>').join('')+'</div><p>เลือกหมวด</p><div>'+Object.keys(CATS).filter(k=>k.startsWith('g'+grade+'_')).map(k=>'<button class="chip'+(k===cat?' sel':'')+'" data-cat="'+k+'">'+CATS[k].n+'</button>').join('')+'</div><p>เลือกโหมด</p><div><button class="chip'+(mode==='word'?' sel':'')+'" data-mode="word">🔤 เลือกคำ</button><button class="chip'+(mode==='spell'?' sel':'')+'" data-mode="spell">✏️ สะกดคำ</button><button class="chip'+(mode==='listen'?' sel':'')+'" data-mode="listen">🎧 ฟังเสียง</button></div>'+(best?'<p style="font-size:14px;opacity:.7">คะแนนสูงสุด '+best+'</p>':'')+'<button class="go" data-a="go">เริ่มเล่น</button>';
+  panel.style.display='block';
+}
+panel.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.grade){grade=b.dataset.grade;cat='g'+grade+'_1';menu()}
+  else if(b.dataset.cat){cat=b.dataset.cat;menu()}
+  else if(b.dataset.mode){mode=b.dataset.mode;menu()}
+  else if(b.dataset.a==='go')startGame();
+  else if(b.dataset.a==='menu')menu();
+});
+opts.forEach((b,i)=>b.addEventListener('pointerdown',e=>{e.preventDefault();answer(i)}));
+addEventListener('keydown',e=>{const k='123'.indexOf(e.key);if(k>=0)answer(k)});
+
+function resize(){const w=innerWidth,hh=innerHeight;renderer.setSize(w,hh,false);camera.aspect=w/hh;camera.updateProjectionMatrix();camera.position.z=w/hh<0.8?7.2:6}
+addEventListener('resize',()=>{resize();fitOpts()});resize();
+
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.04,(now-last)/1000);last=now;
+  const t=now/1000;
+  if(h>0||vy>0){
+    vy-=26*dt;h+=vy*dt;
+    if(h<=0){h=0;vy=0;sq=1;beep(120,0.1,'sine',60,0.15)}
+  }
+  if(state==='ask'){
+    if(animal.position.z<-9){
+      animal.position.z=Math.min(-9,animal.position.z+16*dt);
+      if(animal.position.z>=-9){armed=true;opts.forEach(b=>b.classList.add('on'));if(mode==='listen')say(q[0].toLowerCase())}
+    }else animal.position.y=2.1+Math.sin(t*4)*0.12;
+  }else if(state==='fly'){
+    fT+=dt;
+    if(isRight){
+      const k=Math.min(1,fT/.365);
+      animal.position.z=-9+9*k;animal.position.y=2.1;
+      if(k>=1)hit();
+    }else{
+      animal.position.z=-9+15*Math.min(1,fT/.7);
+      animal.position.y=2.1+Math.min(1,fT/.3)*2.1;
+      animal.material.opacity=Math.max(0,1-Math.max(0,fT-.4)/.4);
+      if(!shown&&fT>=.365){shown=true;miss()}
+      if(fT>=.8){animal.visible=false;state='pause';pt=1.8}
+    }
+  }else if(state==='pause'){
+    pt-=dt;if(pt<=0){fb.style.display='none';qi++;nextQ()}
+  }
+  if(state!=='ready'||true)posts.forEach(p=>{p.position.z+=(state==='ready'||state==='over'?3:12)*dt;if(p.position.z>6)p.position.z-=60});
+  if(state!=='ready'&&state!=='over')roll.rotation.x-=12*dt/R;
+  parts=parts.filter(p=>{
+    p.life-=dt*1.2;p.vy-=12*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;
+    p.m.rotation.y+=dt*8;p.m.scale.setScalar(Math.max(.01,p.life));
+    if(p.life<=0){scene.remove(p.m);return false}return true;
+  });
+  sq=Math.max(0,sq-dt*5);
+  const stretch=h>0?Math.min(0.15,Math.abs(vy)*0.012):0;
+  const sy=1-0.3*sq+stretch,sx=1/Math.sqrt(sy);
+  ball.scale.set(sx,sy,sx);
+  ball.position.y=R*sy+h;
+  if(state==='ready')ball.position.y+=Math.abs(Math.sin(t*3))*0.4;
+  const s=1-Math.min(h,3)/5;shadow.scale.set(s,s,1);shadow.material.opacity=0.1+0.22*s;
+  renderer.render(scene,camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
+
