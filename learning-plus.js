@@ -364,14 +364,15 @@
   }
   function checkTalkAnswer(){
     if(!talkSession||talkSession.resolved)return;
-    const q=talkSession.items[talkSession.index],input=document.getElementById('talkAnswerInput'),raw=input.value.trim(),fb=document.getElementById('talkFeedback');
+    const q=talkSession.items[talkSession.index],input=document.getElementById('talkAnswerInput'),raw=input.value.trim(),fb=document.getElementById('talkFeedback'),checkButton=document.getElementById('checkTalkAnswer'),nextButton=document.getElementById('nextTalkQuestion');
+    if(talkSession.awaitingRepeat){checkButton.hidden=false;checkButton.textContent='ตรวจคำตอบสุดท้าย';nextButton.hidden=true}
     if(!raw){fb.className='feedback retry';fb.textContent=talkSession.awaitingRepeat?'ลองพูดหรือพิมพ์ตามประโยคตัวอย่างก่อนนะคะ':'ลองตอบเป็นภาษาอังกฤษก่อนนะคะ';return}
     if(talkAnswerAccepted(q,raw)){
       talkSession.resolved=true;
       if(!talkSession.awaitingRepeat)talkSession.score++;
       playAnswerSound(true);fb.className='feedback good';fb.textContent=talkSession.awaitingRepeat?`ถูกต้องค่ะ พูดตามได้แล้ว เก่งมากเลย! 🌟`:`ถูกต้องค่ะ น้อง${studentLabel()} เก่งมากเลย! 🌟`;
       coach(talkSession.awaitingRepeat?`ดีมากค่ะ น้อง${studentLabel()} พูดตามได้ถูกต้องแล้ว ไปข้อต่อไปกันค่ะ`:`ถูกต้องค่ะ น้อง${studentLabel()} ตอบได้ดีมาก เก่งมากเลยค่ะ`);
-      document.getElementById('checkTalkAnswer').hidden=true;document.getElementById('nextTalkQuestion').hidden=false;return;
+      checkButton.hidden=true;nextButton.hidden=false;return;
     }
     playAnswerSound(false);
     if(talkSession.awaitingRepeat){
@@ -385,9 +386,10 @@
       talkSession.awaitingRepeat=true;talkSession.correctionAttempts=0;
       const answer=talkAnswer(q);fb.className='feedback retry';
       fb.innerHTML=`ไม่เป็นไรนะคะ น้อง${escapeHTML(studentLabel())} ลองฟังประโยคตัวอย่าง แล้วพูดตามอีกครั้งค่ะ<br><strong>${escapeHTML(answer)}</strong>`;
-      document.getElementById('checkTalkAnswer').textContent='ตรวจคำที่พูดตาม';
+      checkButton.hidden=false;checkButton.textContent='ตรวจคำตอบสุดท้าย';nextButton.hidden=true;
       input.value='';speakTalkLines(q,answer);input.focus();return;
     }
+    checkButton.hidden=false;nextButton.hidden=true;
     fb.className='feedback retry';fb.textContent=`ยังไม่ตรงนะคะ ลองอีกครั้งค่ะ · ${talkSession.attempts}/3`;
     coach(`ไม่เป็นไรค่ะ น้อง${studentLabel()} ลองอีกครั้งนะคะ ${q.hint}`);input.value='';input.focus();
   }
