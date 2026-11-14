@@ -300,7 +300,7 @@
     const grade=Number(child().grade),band=grade<=2?1:grade<=4?2:3,version=activeVersion;
     const lessonTalk=P2_V1_TALK_BANK[activeUnit.id];
     const items=isDailyLifeUnit()?TALK_BANK[band][version].map((q,i)=>({...q,meaning:TALK_MEANINGS[band][version][i]})):(lessonTalk||buildLessonTalk(activeUnit));
-    talkSession={items:[...items],index:0,attempts:0,score:0,resolved:false};
+    talkSession={items:[...items],index:0,attempts:0,score:0,resolved:false,awaitingRepeat:false,correctionAttempts:0};
     renderTalkQuestion(true);
   }
   function talkAnswer(q){return q.answer.replaceAll('{name}',studentLabel()).replaceAll('{grade}',String(child().grade))}
@@ -364,19 +364,36 @@
   }
   function checkTalkAnswer(){
     if(!talkSession||talkSession.resolved)return;
-    const q=talkSession.items[talkSession.index],raw=document.getElementById('talkAnswerInput').value.trim(),fb=document.getElementById('talkFeedback');
-    if(!raw){fb.className='feedback retry';fb.textContent='ลองตอบเป็นภาษาอังกฤษก่อนนะคะ';return}
+    const q=talkSession.items[talkSession.index],input=document.getElementById('talkAnswerInput'),raw=input.value.trim(),fb=document.getElementById('talkFeedback');
+    if(!raw){fb.className='feedback retry';fb.textContent=talkSession.awaitingRepeat?'ลองพูดหรือพิมพ์ตามประโยคตัวอย่างก่อนนะคะ':'ลองตอบเป็นภาษาอังกฤษก่อนนะคะ';return}
     if(talkAnswerAccepted(q,raw)){
-      talkSession.resolved=true;talkSession.score++;playAnswerSound(true);fb.className='feedback good';fb.textContent=`ถูกต้องค่ะ น้อง${studentLabel()} เก่งมากเลย! 🌟`;
-      coach(`ถูกต้องค่ะ น้อง${studentLabel()} ตอบได้ดีมาก เก่งมากเลยค่ะ`);document.getElementById('checkTalkAnswer').hidden=true;document.getElementById('nextTalkQuestion').hidden=false;return;
+      talkSession.resolved=true;
+      if(!talkSession.awaitingRepeat)talkSession.score++;
+      playAnswerSound(true);fb.className='feedback good';fb.textContent=talkSession.awaitingRepeat?`ถูกต้องค่ะ พูดตามได้แล้ว เก่งมากเลย! 🌟`:`ถูกต้องค่ะ น้อง${studentLabel()} เก่งมากเลย! 🌟`;
+      coach(talkSession.awaitingRepeat?`ดีมากค่ะ น้อง${studentLabel()} พูดตามได้ถูกต้องแล้ว ไปข้อต่อไปกันค่ะ`:`ถูกต้องค่ะ น้อง${studentLabel()} ตอบได้ดีมาก เก่งมากเลยค่ะ`);
+      document.getElementById('checkTalkAnswer').hidden=true;document.getElementById('nextTalkQuestion').hidden=false;return;
     }
-    talkSession.attempts++;playAnswerSound(false);
-    if(talkSession.attempts>3){talkSession.resolved=true;const answer=talkAnswer(q);fb.className='feedback retry';fb.innerHTML=`ไม่เป็นไรนะคะ น้อง${escapeHTML(studentLabel())} ประโยคตัวอย่างคือ <strong>${escapeHTML(answer)}</strong> ลองฟังแล้วพูดตามได้ค่ะ`;speakTalkLines(q,answer);document.getElementById('checkTalkAnswer').hidden=true;document.getElementById('nextTalkQuestion').hidden=false;return}
-    fb.className='feedback retry';fb.textContent=`ยังไม่ตรงนะคะ ลองอีกครั้งค่ะ · ${talkSession.attempts}/3`;coach(`ไม่เป็นไรค่ะ น้อง${studentLabel()} ลองอีกครั้งนะคะ ${q.hint}`);document.getElementById('talkAnswerInput').value='';document.getElementById('talkAnswerInput').focus();
+    playAnswerSound(false);
+    if(talkSession.awaitingRepeat){
+      talkSession.correctionAttempts=(talkSession.correctionAttempts||0)+1;
+      fb.className='feedback retry';fb.textContent='ยังพูดตามไม่ตรงนะคะ ครูจะพูดตัวอย่างให้อีกครั้ง ลองฟังแล้วพูดตามช้า ๆ ค่ะ';
+      coach(`ไม่เป็นไรค่ะ น้อง${studentLabel()} ฟังประโยคตัวอย่างอีกครั้ง แล้วลองพูดตามช้า ๆ นะคะ`);
+      speakTalkLines(q,talkAnswer(q));input.value='';input.focus();return;
+    }
+    talkSession.attempts++;
+    if(talkSession.attempts>=3){
+      talkSession.awaitingRepeat=true;talkSession.correctionAttempts=0;
+      const answer=talkAnswer(q);fb.className='feedback retry';
+      fb.innerHTML=`ไม่เป็นไรนะคะ น้อง${escapeHTML(studentLabel())} ลองฟังประโยคตัวอย่าง แล้วพูดตามอีกครั้งค่ะ<br><strong>${escapeHTML(answer)}</strong>`;
+      document.getElementById('checkTalkAnswer').textContent='ตรวจคำที่พูดตาม';
+      input.value='';speakTalkLines(q,answer);input.focus();return;
+    }
+    fb.className='feedback retry';fb.textContent=`ยังไม่ตรงนะคะ ลองอีกครั้งค่ะ · ${talkSession.attempts}/3`;
+    coach(`ไม่เป็นไรค่ะ น้อง${studentLabel()} ลองอีกครั้งนะคะ ${q.hint}`);input.value='';input.focus();
   }
   function nextTalkQuestion(){
     if(!talkSession?.resolved)return;
-    if(talkSession.index<talkSession.items.length-1){talkSession.index++;talkSession.attempts=0;talkSession.resolved=false;renderTalkQuestion(true);return}
+    if(talkSession.index<talkSession.items.length-1){talkSession.index++;talkSession.attempts=0;talkSession.resolved=false;talkSession.awaitingRepeat=false;talkSession.correctionAttempts=0;renderTalkQuestion(true);return}
     const v=versionData();v.activityDone=v.activityDone||{};v.activityDone[activeUnit.id]=v.activityDone[activeUnit.id]||{};v.activityDone[activeUnit.id].talk=true;v.points=(v.points||0)+Math.max(1,talkSession.score);save();
     const score=talkSession.score,total=talkSession.items.length;talkSession=null;
     document.getElementById('studyView').innerHTML=`<div class="panel talk-finish"><div class="success-emoji">🗣️⭐</div><h2>ฝึกสนทนาครบแล้วค่ะ!</h2><p>น้อง${escapeHTML(studentLabel())} ตอบถูกด้วยตัวเอง ${score} จาก ${total} ข้อ ขอบคุณที่ตั้งใจฝึกนะคะ</p><div class="form-row" style="justify-content:center"><button class="primary" id="talkFinishBack">กลับเมนูกิจกรรม</button><button class="secondary" id="talkFinishLessons">บทเรียนทั้งหมด</button></div></div>`;
@@ -661,3 +678,4 @@
   renderDailyTimer();
   renderAll();
 })();
+
