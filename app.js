@@ -128,11 +128,10 @@ document.getElementById('installBtn').onclick=async()=>{if(deferredPrompt){defer
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 function startIntroVideo(){
- const overlay=document.getElementById('introVideoOverlay'),video=document.getElementById('introVideoPlayer'),soundButton=document.getElementById('introSoundButton');if(!overlay||!video||!soundButton)return;
+ const overlay=document.getElementById('introVideoOverlay'),video=document.getElementById('introVideoPlayer'),startButton=document.getElementById('introStartButton');if(!overlay||!video||!startButton)return;
  let finished=false;const finish=()=>{if(finished)return;finished=true;video.pause();overlay.hidden=true};
- video.addEventListener('ended',finish,{once:true});video.addEventListener('error',finish,{once:true});
- soundButton.onclick=()=>{video.muted=!video.muted;video.volume=1;soundButton.textContent=video.muted?'🔊 แตะเพื่อเปิดเสียง':'🔇 ปิดเสียง';soundButton.setAttribute('aria-label',video.muted?'เปิดเสียงวิดีโอ':'ปิดเสียงวิดีโอ');video.play().catch(()=>{video.muted=true;soundButton.textContent='🔊 แตะเพื่อเปิดเสียง'})};
- video.muted=false;video.volume=1;video.play().then(()=>{soundButton.textContent='🔇 ปิดเสียง';soundButton.setAttribute('aria-label','ปิดเสียงวิดีโอ')}).catch(()=>{video.muted=true;soundButton.textContent='🔊 แตะเพื่อเปิดเสียง';soundButton.setAttribute('aria-label','แตะเพื่อเปิดเสียงวิดีโอ');video.play().catch(()=>{soundButton.textContent='▶ แตะเพื่อเล่นวิดีโอ'})});
+ video.addEventListener('ended',finish,{once:true});video.addEventListener('error',finish,{once:true});startButton.addEventListener('click',finish,{once:true});
+ video.muted=false;video.volume=1;video.play().catch(()=>{video.muted=true;video.play().catch(finish)});
 }
 syncCourse();renderAll();startIntroVideo();
 
