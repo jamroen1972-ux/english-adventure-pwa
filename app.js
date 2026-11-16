@@ -1,5 +1,5 @@
 const KEY='english-adventure-p2-v1';
-const APP_VERSION='10.5';
+const APP_VERSION='10.7';
 const APP_AUTHOR='Jamroen Suwanphum';
 let state=loadState();
 let selectedId=state.activeId||state.profiles[0].id;

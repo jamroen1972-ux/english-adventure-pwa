@@ -170,24 +170,23 @@
   @media(max-width:520px){#phonics3DOverlay .animal-words-bar{gap:8px;padding-left:9px;padding-right:9px}#phonics3DOverlay .animal-words-bar strong{font-size:13px}}
 </style>
   <style>
-    .special-tool-card{position:relative;isolation:isolate;overflow:hidden;width:100%;display:grid;grid-template-columns:1fr;gap:10px;padding:13px;border:1px solid #8c9cff;border-radius:24px;background:linear-gradient(125deg,#3836b9 0%,#5147d7 54%,#7654dc 100%);box-shadow:0 12px 24px #4033a83d;color:#fff;text-align:center}
-    .special-tool-card:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 92% 14%,#ffffff27,transparent 32%),linear-gradient(120deg,transparent 30%,#ffffff0d 60%,transparent 80%);pointer-events:none}
-    .special-tool-card:hover{transform:translateY(-3px);box-shadow:0 16px 30px #4033a84d}
-    .special-tool-banner{display:block;width:100%;height:clamp(130px,20vw,220px);object-fit:cover;object-position:center;border:1px solid #ffffff8a;border-radius:18px;box-shadow:0 6px 14px #211b7140}
-    .special-tool-people{position:relative;width:min(100%,440px);height:84px;margin:0 auto;display:grid;grid-template-columns:76px 1fr 76px;align-items:center;justify-items:center;gap:10px}
-    .special-person{width:68px;height:76px;display:block;border:2px solid #ffffffb5;border-radius:20px;background-image:url('./translator-banner.webp');background-repeat:no-repeat;background-size:248px 83px;box-shadow:inset 0 1px 2px #fff8,0 5px 12px #211b7140;animation:translatorPersonBob 2.2s ease-in-out infinite}
-    .special-person-left{background-position:left center;transform-origin:bottom center}
-    .special-person-right{background-position:right center;animation-delay:.35s;transform-origin:bottom center}
-    .special-sound-wave{width:100%;height:54px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 7px;border:1px solid #ffffff55;border-radius:99px;background:linear-gradient(90deg,#53d7ff32,#ffe47d35,#53d7ff32);box-shadow:inset 0 1px 4px #ffffff30,0 4px 12px #211b7130}
-    .special-sound-wave i{width:5px;height:16px;border-radius:9px;background:linear-gradient(180deg,#fff19a,#6fe5ff);box-shadow:0 0 9px #80e9ff90;transform-origin:center;animation:translatorWave .72s ease-in-out infinite alternate}
-    .special-sound-wave i:nth-child(3n){height:30px;animation-delay:.18s}.special-sound-wave i:nth-child(3n+1){height:22px;animation-delay:.36s}.special-sound-wave i:nth-child(4n){height:40px;animation-delay:.1s}
-    .special-tool-copy{display:grid;gap:3px;justify-items:center;padding:0 8px 4px}
-    .special-tool-copy strong{color:#fff;font-size:19px}
-    .special-tool-copy small{color:#f0edff;font-size:13px;line-height:1.5}
-    @keyframes translatorPersonBob{0%,100%{translate:0 1px;rotate:-1deg}50%{translate:0 -4px;rotate:1deg}}
-    @keyframes translatorWave{from{scale:1 .46;opacity:.7}to{scale:1 1.18;opacity:1}}
-    @media(max-width:520px){.special-tool-card{gap:9px;padding:10px;border-radius:22px}.special-tool-banner{height:clamp(112px,31vw,146px);border-radius:16px}.special-tool-people{height:74px;grid-template-columns:62px 1fr 62px;gap:7px}.special-person{width:56px;height:66px;background-size:204px 68px;border-radius:17px}.special-sound-wave{height:46px;gap:3px;padding:0 5px}.special-sound-wave i{width:4px}.special-tool-copy strong{font-size:17px}.special-tool-copy small{font-size:12px}}
-    @media(prefers-reduced-motion:reduce){.special-person,.special-sound-wave i{animation:none}}
+    .special-tool-card{position:relative;display:block;width:100%;padding:3px;border:0;border-radius:19px;overflow:hidden;background:linear-gradient(135deg,#fff3a6 0%,#72edff 18%,#657aff 48%,#b68aff 76%,#fff1a2 100%);box-shadow:0 3px 0 #3343a4,0 8px 16px #3d53c04f;color:#fff;text-align:center;line-height:1;transition:transform .16s ease,box-shadow .16s ease}
+    .special-tool-card:hover{transform:translateY(-2px);box-shadow:0 5px 0 #3343a4,0 12px 20px #3d53c05c}
+    .special-tool-card:active{transform:translateY(2px);box-shadow:0 1px 0 #3343a4,0 4px 9px #3d53c04f}
+    .special-tool-card:focus-visible{outline:3px solid #ffdc69;outline-offset:3px}
+    .translator-banner-stage{position:relative;display:block;width:100%;height:clamp(90px,24vw,118px);overflow:hidden;border-radius:16px;background:#465de8;line-height:normal;isolation:isolate}
+    .special-tool-banner{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center 47%;border:0;border-radius:0;box-shadow:none;z-index:-2}
+    .translator-banner-pattern{position:absolute;inset:0;z-index:-1;opacity:.2;background:radial-gradient(circle at 50% 45%,#e6fcff 0 1px,transparent 2px) 0 0/16px 16px,repeating-linear-gradient(135deg,transparent 0 26px,#ffffff16 27px 28px,transparent 29px 54px);mix-blend-mode:screen;pointer-events:none}
+    .translator-banner-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;color:#fff;pointer-events:none}
+    .translator-banner-title{font-size:clamp(13px,3.8vw,18px);font-weight:1000;font-style:italic;letter-spacing:.15px;text-shadow:0 1px 0 #a7c8ff,0 2px 0 #4661b5,0 4px 7px #14256bb5}
+    .translator-banner-subtitle{margin-top:3px;padding:2px 10px;border:1px solid #ffffff70;border-radius:99px;background:linear-gradient(180deg,#ffffffd9,#dce8ffdb);box-shadow:0 2px 0 #2a3f97,0 4px 8px #17256959;color:#3453a4;font-size:clamp(9px,2.5vw,11px);font-weight:1000;letter-spacing:.5px;text-shadow:0 1px #fff}
+    .special-sound-wave{position:absolute;left:50%;bottom:25px;display:flex;align-items:center;justify-content:center;gap:4px;width:112px;height:18px;transform:translateX(-50%);pointer-events:none}
+    .special-sound-wave i{display:block;width:4px;height:8px;border-radius:8px;background:linear-gradient(180deg,#fff39c,#55e5ff);box-shadow:0 0 7px #8defffbd;transform-origin:center;animation:translatorWave .7s ease-in-out infinite alternate}
+    .special-sound-wave i:nth-child(3n){animation-delay:.18s}.special-sound-wave i:nth-child(3n+1){animation-delay:.34s}.special-sound-wave i:nth-child(4n){animation-delay:.1s}
+    .translator-banner-caption{position:absolute;left:0;right:0;bottom:6px;color:#fff;font-size:clamp(9px,2.7vw,12px);font-weight:900;letter-spacing:.1px;text-shadow:0 1px 0 #5268c7,0 2px 5px #17256dbd;pointer-events:none}
+    @keyframes translatorWave{from{scale:1 .38;opacity:.68}to{scale:1 1.6;opacity:1}}
+    @media(max-width:520px){.special-tool-card{padding:3px;border-radius:17px}.translator-banner-stage{height:clamp(90px,24vw,108px);border-radius:14px}.translator-banner-overlay{padding-top:7px}.special-sound-wave{bottom:24px;height:16px;gap:3px}.special-sound-wave i{width:3px}.translator-banner-caption{bottom:5px}}
+    @media(prefers-reduced-motion:reduce){.special-sound-wave i{animation:none}}
   </style>
 </head>
 <body>
@@ -205,7 +204,7 @@
     <div class="section-head"><div><h2>การเรียนของฉัน</h2><p>ทุกความพยายามมีความหมาย 🌱</p></div><button class="text-btn" onclick="showView('progressView')">ดูพัฒนาการ </button></div>
     <div class="stats"><div class="stat"><div class="stat-icon">⭐</div><div><b id="pointsStat">0</b><span>คะแนนสะสม</span></div></div><div class="stat"><div class="stat-icon">📚</div><div><b id="lessonStat">0</b><span>บทที่เรียนจบ</span></div></div><div class="stat"><div class="stat-icon">🔥</div><div><b id="streakStat">0</b><span>วันที่ฝึกต่อเนื่อง</span></div></div></div>
     <div class="panel daily-timer"><div style="font-size:34px">⏱️</div><div class="daily-timer-copy"><h3>เป้าหมายการเรียนวันนี้</h3><strong id="studyTimeLabel">0:00 / 60:00 นาที</strong><div class="timer-track"><i id="studyTimeBar"></i></div><p class="install-hint" id="studyTimeNote">เวลาจะนับตอนอยู่ในหน้าบทเรียนและกิจกรรม</p></div></div>
-    <section class="special-tools"><div class="section-head"><div><h2>เมนูพิเศษ</h2><p>เครื่องมือช่วยสื่อสาร แยกจากบทเรียน</p></div></div><button class="special-tool-card" type="button" onclick="showView('interpreterView')"><img class="special-tool-banner" src="./translator-banner.webp" alt="" aria-hidden="true"><span class="special-tool-people" aria-hidden="true"><span class="special-person special-person-left"></span><span class="special-sound-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="special-person special-person-right"></span></span><span class="special-tool-copy"><strong>ล่ามแปลภาษา</strong><small>พูดคนละภาษา ก็สื่อสารกันได้</small></span></button></section>
+    <section class="special-tools"><div class="section-head"><div><h2>เมนูพิเศษ</h2><p>เครื่องมือช่วยสื่อสาร แยกจากบทเรียน</p></div></div><button class="special-tool-card" type="button" onclick="showView('interpreterView')" aria-label="เปิดเมนูล่ามแปลภาษา"><span class="translator-banner-stage"><img class="special-tool-banner" src="./translator-banner-clean.webp" alt="" aria-hidden="true"><span class="translator-banner-pattern" aria-hidden="true"></span><span class="translator-banner-overlay"><strong class="translator-banner-title">English Adventure</strong><span class="translator-banner-subtitle">TRANSLATOR · ล่ามแปลภาษา</span></span><span class="special-sound-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="translator-banner-caption">คุยกันได้แม้พูดคนละภาษา</span></span></button></section>
   </section>
   <section class="view" id="lessonsView"><div class="section-head"><div><h2>บทเรียน <span id="courseGradeTitle">ป.2</span></h2><p id="courseTrackNote">เลือกเรื่องที่อยากเรียนวันนี้ได้เลย</p></div></div><div class="panel" id="versionPanel" style="margin-bottom:16px"></div><div id="alphabetEntry"></div><div id="phonics3DEntry"></div><div class="unit-grid" id="allUnits"></div>
   <section class="animal-words-section" id="animalWordsSection" hidden>
@@ -239,7 +238,7 @@
 <div class="eye-break-overlay" id="eyeBreakOverlay" aria-hidden="true" role="dialog" aria-label="พักสายตา"><div class="eye-break-card"><div class="eye-break-icon">🌳</div><p class="eyebrow">พักสายตาสักครู่นะคะ</p><h2>มองไปไกล ๆ</h2><p>มองสิ่งที่อยู่ห่างประมาณ 6 เมตร เพื่อพักสายตา</p><div class="eye-break-count" id="eyeBreakCountdown">20</div><p>วินาที แล้วกลับมาเรียนต่อกันค่ะ</p></div></div>
 <script src="./courses.js"></script>
 <script src="./app.js"></script>
-<script src="./learning-plus.js?v=20261116-translator-card"></script>
+<script src="./learning-plus.js?v=20261116-translator-banner-v3"></script>
 
 
 <div id="animalWordsOverlay" hidden aria-hidden="true">
