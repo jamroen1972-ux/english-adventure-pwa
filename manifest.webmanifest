@@ -1,16 +1,2 @@
-{
-  "id": "./",
-  "name": "English Adventure ป.1–ป.6",
-  "short_name": "English Adventure",
-  "description": "บทเรียนภาษาอังกฤษ ป.1–ป.6 พร้อมฝึกอ่าน เกม คะแนน และเส้นทางเรียนรู้ตามหลักสูตรโรงเรียน",
-  "lang": "th-TH",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#f5f7fc",
-  "theme_color": "#f4f7ff",
-  "icons": [
-    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
-  ]
-}
+{"id":"./","name":"English Adventure ป.1–ป.6","short_name":"English Adventure","description":"บทเรียนภาษาอังกฤษ ป.1–ป.6 เรียนผ่านแอนิเมชัน เกม คะแนน และเส้นทางเรียนรู้ 2 เวอร์ชัน","lang":"th-TH","start_url":"./","scope":"./","display":"standalone","orientation":"portrait-primary","background_color":"#f5f7fc","theme_color":"#4f73ec",
+"icons":[{"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"./icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}

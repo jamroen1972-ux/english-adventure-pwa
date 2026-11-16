@@ -1,9 +1,15 @@
-# English Adventure 10.0 home video update
+# English Adventure 10.4
 
-Overlay update for the inspected english-adventure-pwa main branch.
+## การติดตั้งบน GitHub Pages
 
-Files: replace index.html, app.js, and sw.js in the repository root; add home-intro.mp4 and home-intro-poster.jpg to the root.
+1. แตกไฟล์ ZIP ลงในเครื่อง
+2. เปิด repository `jamroen1972-ux/english-adventure-pwa` แล้วเลือก **Add file → Upload files**
+3. อัปโหลดไฟล์และโฟลเดอร์ทั้งหมดจากภายใน ZIP ไปไว้ที่ราก repository โดยคงโครงสร้างเดิม
+4. ตรวจว่า `index.html`, `app.js`, `courses.js`, `learning-plus.js`, `sw.js`, `manifest.webmanifest`, ไฟล์ `phonics-p1.html` ถึง `phonics-p6.html` และโฟลเดอร์ `word-jump-grades-3-6/` อยู่ครบ
+5. กด **Commit changes** และรอ GitHub Pages เผยแพร่
 
-The Meta AI video becomes the default home banner when no custom banner photos are configured. It plays muted, inline, and in a loop; native controls allow pausing or enabling sound. Existing learning, game, progress, profile, and navigation features remain in place. The poster is precached for offline display; the larger video is not part of install caching, and Range requests bypass the service worker. Custom banner photos continue to override the video.
+อย่าอัปโหลด ZIP ซ้อนเป็นไฟล์เดียวในเว็บไซต์ และอย่าอัปโหลดเฉพาะ `index.html` เพราะแอปเรียกใช้ไฟล์อื่นร่วมกัน
 
-After applying these five files, commit to main for GitHub Pages to publish.
+## คู่มือในแอป
+
+เปิดเมนู **โปรไฟล์** แล้วแตะ **คู่มือการใช้งาน** เพื่ออ่านขั้นตอนการตั้งค่าโปรไฟล์ บทเรียน เวอร์ชัน 1/2 แบบฝึก A–Z เกมเสริม การฝึกอ่าน/สะกดคำ และการใช้เมนูถาม–แปลกับล่าม

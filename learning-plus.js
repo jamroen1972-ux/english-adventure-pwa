@@ -194,10 +194,10 @@
       {topic:'การเล่น',en:'How can you invite a friend to play?',answer:'Let’s play together.',rule:'exact',accept:['lets play together','let us play together','play together'],meaning:'ครูจะถามว่าน้องจะชวนเพื่อนมาเล่นด้วยกันอย่างไร ให้น้องตอบเป็นภาษาอังกฤษค่ะ',hint:'ลองนึกถึงประโยคชวนเล่นที่เรียนในบทนี้'}
     ]
   };
-  function talkAvailable(){return !!activeUnit&&Array.isArray(activeUnit.items)&&activeUnit.items.length>0}
+  window.__talkNow=()=>talkSession&&talkSession.items&&talkSession.items[talkSession.index];window.__talkAnswer=talkAnswer;function talkAvailable(){return !!activeUnit&&Array.isArray(activeUnit.items)&&activeUnit.items.length>0}
   function isDailyLifeUnit(){return !!activeUnit&&activeUnit.id.startsWith('daily-life-p')}
   function buildLessonTalk(unit){
-    return unit.items.slice(0,5).map((item,i)=>{
+    return unit.items.slice(0,10).map((item,i)=>{
       const word=String(item[0]||'').trim(),meaning=String(item[1]||word).trim(),sample=String(item[3]||'').trim();
       const sampleUsesWord=sample&&!sample.trim().endsWith('?')&&normalizeTalk(sample).includes(normalizeTalk(word));
       return{topic:meaning,en:`Can you make a sentence with the word “${word}”?`,answer:sampleUsesWord?sample:`I learned about ${word} today.`,rule:'lessonWordUse',target:word,meaning:`ครูจะถามให้น้องแต่งประโยคภาษาอังกฤษสั้น ๆ ที่ใช้คำว่า “${meaning}” จากบทนี้ค่ะ`,hint:`ลองใช้คำศัพท์ “${meaning}” ที่เรียนในบทนี้แต่งประโยคภาษาอังกฤษนะคะ`};
@@ -299,7 +299,7 @@
   function startTalk(){
     const grade=Number(child().grade),band=grade<=2?1:grade<=4?2:3,version=activeVersion;
     const lessonTalk=P2_V1_TALK_BANK[activeUnit.id];
-    const items=isDailyLifeUnit()?TALK_BANK[band][version].map((q,i)=>({...q,meaning:TALK_MEANINGS[band][version][i]})):(lessonTalk||buildLessonTalk(activeUnit));
+    let items=isDailyLifeUnit()?TALK_BANK[band][version].map((q,i)=>({...q,meaning:TALK_MEANINGS[band][version][i]})):(lessonTalk||buildLessonTalk(activeUnit));if(items.length<10)items=items.concat(buildLessonTalk(activeUnit).slice(items.length,10));
     talkSession={items:[...items],index:0,attempts:0,score:0,resolved:false,awaitingRepeat:false,correctionAttempts:0};
     renderTalkQuestion(true);
   }
@@ -440,7 +440,7 @@
   }
   function renderSpelling(){
     const item=activity.items[activity.index],shown=activity.revealed;
-    document.getElementById('studyView').innerHTML=`<div class="section-head"><div><h2>✍️ ฝึกเขียนคำศัพท์</h2><p>${escapeHTML(activeUnit.th)} · คำที่ ${activity.index+1} จาก ${activity.items.length}</p></div><button class="secondary" id="activityBack">กลับบทเรียน</button></div><div class="panel activity-card spell-card"><div class="tag">ดูความหมาย แล้วพิมพ์คำศัพท์ภาษาอังกฤษ</div><div class="spell-board"><div class="spell-count">${item[2]} คำที่ ${activity.index+1} / ${activity.items.length}</div><div class="spell-clue">${escapeHTML(item[1])}</div>${shown?`<div class="spell-answer" id="spellAnswer" aria-label="คำตอบที่ถูกต้อง"></div><div class="muted">สังเกตตัวอักษร แล้วลองพิมพ์คำนี้ด้วยตัวเองนะ</div>`:''}</div><label class="field spell-field"><span>พิมพ์คำภาษาอังกฤษ</span><input id="spellInput" class="spell-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="พิมพ์คำศัพท์ภาษาอังกฤษ"></label><div class="form-row spell-actions"><button class="primary" id="checkSpelling" ${activity.done?'disabled':''}>ตรวจคำตอบ</button><button class="secondary" id="nextSpelling" ${activity.done?'':'hidden'}>${activity.index===activity.items.length-1?'จบบทฝึก':'คำถัดไป'} →</button></div><div id="spellFeedback" class="feedback" aria-live="polite">คำใบ้: ${escapeHTML(item[1])} ลองพิมพ์เป็นภาษาอังกฤษนะคะ</div><p class="install-hint">${shown?'พิมพ์คำที่แสดงบนกระดานให้ถูกต้อง แล้วกดตรวจคำตอบ':'ถ้าตอบผิดเกิน 3 ครั้ง ครูจะช่วยแสดงคำตอบตัวใหญ่ให้ดู'}</p></div>`;
+    document.getElementById('studyView').innerHTML=`<div class="section-head"><div><h2>✍️ ฝึกเขียนคำศัพท์</h2><p>${escapeHTML(activeUnit.th)} · คำที่ ${activity.index+1} จาก ${activity.items.length}</p></div><button class="secondary" id="activityBack">กลับบทเรียน</button></div><div class="panel activity-card spell-card"><div class="tag">ดูความหมาย แล้วพิมพ์คำศัพท์ภาษาอังกฤษ</div><div class="spell-board"><div class="spell-count">${item[2]} คำที่ ${activity.index+1} / ${activity.items.length}</div><div class="spell-clue">${escapeHTML(item[1])}</div>${shown?`<div class="spell-answer" id="spellAnswer" aria-label="คำตอบที่ถูกต้อง"></div><div class="muted">สังเกตตัวอักษร แล้วลองพิมพ์คำนี้ด้วยตัวเองนะ</div>`:''}</div><label class="field spell-field"><span>พิมพ์คำภาษาอังกฤษ</span><input id="spellInput" class="spell-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="พิมพ์คำศัพท์ภาษาอังกฤษ"></label><div class="form-row spell-actions"><button class="primary" id="checkSpelling" ${activity.done?'disabled':''}>ตรวจคำตอบ</button><button class="secondary" id="nextSpelling" ${activity.done?'':'hidden'}>${activity.index===activity.items.length-1?'จบบทฝึก':'คำถัดไป'} →</button></div><div id="spellFeedback" class="feedback" aria-live="polite"></div><p class="install-hint">${shown?'พิมพ์คำที่แสดงบนกระดานให้ถูกต้อง แล้วกดตรวจคำตอบ':''}</p></div>`;
     document.getElementById('activityBack').onclick=backToStudy;
     const input=document.getElementById('spellInput');
     document.getElementById('checkSpelling').onclick=checkSpelling;
@@ -492,18 +492,18 @@
   }
   function startSentenceOrder(){
     const pool=activeUnit.items.filter(w=>w[3]&&w[3].trim());
-    activity={type:'order',items:shuffle(pool).slice(0,Math.min(3,pool.length)),index:0,chosen:[]};
+    activity={type:'order',items:shuffle(pool).slice(0,Math.min(10,pool.length)),index:0,chosen:[]};
     renderSentenceOrder();
   }
   function renderSentenceOrder(){
     const item=activity.items[activity.index],words=item[3].replace(/[.!?]+$/,'').split(/\s+/),scramble=shuffle(words.map((word,index)=>({word,index}))).filter(x=>!activity.chosen.includes(x.index));
     const chosen=activity.chosen.map(i=>words[i]);
-    document.getElementById('studyView').innerHTML=`<div class="section-head"><div><h2>🧩 เรียงคำเป็นประโยค</h2><p>${escapeHTML(activeUnit.th)} · ประโยค ${activity.index+1} จาก ${activity.items.length}</p></div><button class="secondary" id="activityBack"> กลับบทเรียน</button></div><div class="panel activity-card"><p class="muted">ความหมาย: ${escapeHTML(item[4]||'ลองเรียงคำให้เป็นประโยคภาษาอังกฤษ')}</p><div class="answer-tray" id="answerTray">${chosen.length?chosen.map((w,i)=>`<button class="word-chip selected-word" data-chosen="${i}">${escapeHTML(w)}</button>`).join(''):'<span class="muted">แตะคำด้านล่างเพื่อเรียงประโยค</span>'}</div><div class="word-chips">${scramble.map(x=>`<button class="word-chip" data-word="${x.index}">${escapeHTML(x.word)}</button>`).join('')}</div><div class="form-row"><button class="primary" id="checkSentence">ตรวจคำตอบ</button><button class="secondary" id="clearSentence">ล้างคำที่เลือก</button></div><div id="activityFeedback" class="feedback" aria-live="polite"></div></div>`;
+    document.getElementById('studyView').innerHTML=`<div class="section-head"><div><h2>🧩 เรียงคำเป็นประโยค</h2><p>${escapeHTML(activeUnit.th)} · ประโยค ${activity.index+1} จาก ${activity.items.length}</p></div><button class="secondary" id="activityBack"> กลับบทเรียน</button></div><div class="panel activity-card"><p class="muted">ความหมาย: ${escapeHTML(item[4]||'ลองเรียงคำให้เป็นประโยคภาษาอังกฤษ')}</p><div class="answer-tray" id="answerTray">${chosen.length?chosen.map((w,i)=>`<button class="word-chip selected-word" data-chosen="${i}">${escapeHTML(w)}</button>`).join(''):'<span class="muted">แตะคำด้านล่างเพื่อเรียงประโยค</span>'}</div><div class="word-chips">${scramble.map(x=>`<button class="word-chip" data-word="${x.index}">${escapeHTML(x.word)}</button>`).join('')}</div><div class="form-row"><button class="primary" id="checkSentence" hidden>ตรวจคำตอบ</button><button class="secondary" id="clearSentence">ล้างคำที่เลือก</button></div><div id="activityFeedback" class="feedback" aria-live="polite"></div></div>`;
     document.getElementById('activityBack').onclick=backToStudy;
     document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{activity.chosen.push(Number(b.dataset.word));renderSentenceOrder()});
     document.querySelectorAll('[data-chosen]').forEach(b=>b.onclick=()=>{activity.chosen.splice(Number(b.dataset.chosen),1);renderSentenceOrder()});
     document.getElementById('clearSentence').onclick=()=>{activity.chosen=[];renderSentenceOrder()};
-    document.getElementById('checkSentence').onclick=checkSentence;
+    document.getElementById('checkSentence').onclick=checkSentence;if(!scramble.length&&activity.chosen.length){setTimeout(()=>{if(activity&&activity.type==='order'&&document.getElementById('checkSentence'))checkSentence()},450)}
   }
   function checkSentence(){
     const item=activity.items[activity.index],target=normalize(item[3]),words=item[3].replace(/[.!?]+$/,'').split(/\s+/),answer=activity.chosen.map(i=>words[i]).join(' '),fb=document.getElementById('activityFeedback');
