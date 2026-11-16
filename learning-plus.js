@@ -226,6 +226,12 @@
   function goalSeconds(p=child()){const m=Number.parseInt(p.dailyGoalMinutes??60,10);return Math.max(1,Math.min(720,Number.isFinite(m)?m:60))*60}
   function formatTime(s){const m=Math.floor(s/60),r=s%60;return `${m}:${String(r).padStart(2,'0')}`}
   function persist(){state.activeId=selectedId;localStorage.setItem(KEY,JSON.stringify(state))}
+  function updateDeskClock(){
+    const now=new Date(),hour=now.getHours()%12,minute=now.getMinutes(),second=now.getSeconds()+now.getMilliseconds()/1000;
+    const angles={deskClockHour:(hour+minute/60+second/3600)*30,deskClockMinute:(minute+second/60)*6,deskClockSecond:second*6};
+    for(const [id,angle] of Object.entries(angles)){const hand=document.getElementById(id);if(hand)hand.style.transform=`rotate(${angle}deg)`}
+    const clock=document.getElementById('deskClock');if(clock)clock.setAttribute('aria-label',`นาฬิกาตั้งโต๊ะ เวลา ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`)
+  }
   function renderDailyTimer(){
     const seconds=secondsToday(),target=goalSeconds(),minutes=target/60,label=document.getElementById('studyTimeLabel'),bar=document.getElementById('studyTimeBar'),note=document.getElementById('studyTimeNote');
     if(label)label.textContent=`${formatTime(Math.min(seconds,target))} / ${formatTime(target)} นาที`;
@@ -682,11 +688,12 @@
     if(Number(result.grade)!==grade||version!==activeVersion||version>(course.unlockedVersion||1)||total!==10||correct<0||correct>total||score!==Math.round(correct/total*100))return;
     const p=child();p.phonicsHistory=p.phonicsHistory||[];p.phonicsHistory.unshift({date:new Date().toISOString(),score:score,correct:correct,total:total,attempts:Number(result.attempts)||0,version:version,title:'เกมผสมเสียง 3D ป.'+grade+' · V'+version});p.phonicsHistory=p.phonicsHistory.slice(0,120);persist();renderReport();toast('บันทึกผลเกมผสมเสียงแล้ว · '+score+'%');
   });
-  document.addEventListener('visibilitychange',()=>{tickStudyTimer();lastTick=Date.now();renderDailyTimer()});
+  document.addEventListener('visibilitychange',()=>{tickStudyTimer();lastTick=Date.now();updateDeskClock();renderDailyTimer()});
   window.addEventListener('pagehide',()=>{tickStudyTimer();persist()});
   ensureData();
   window.renderDailyTimer=renderDailyTimer;
   window.setInterval(tickStudyTimer,1000);
+  updateDeskClock();window.setInterval(updateDeskClock,1000);
   renderDailyTimer();
   renderAll();
 })();
