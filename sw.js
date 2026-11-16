@@ -1,4 +1,4 @@
-const CACHE='english-adventure-v55';
+const CACHE='english-adventure-v57';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-maskable-512.png','./app.js','./courses.js','./learning-plus.js','./polish.css','./polish.js','./motion.js','./cat.js','./translator-banner.webp','./home-intro-poster.jpg','./animal-words.html','./word-jump-grades-3-6/index.html','./word-jump-grades-3-6/three.min.js','./phonics-p1.html','./phonics-p2.html','./phonics-p3.html','./phonics-p4.html','./phonics-p5.html','./phonics-p6.html'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));

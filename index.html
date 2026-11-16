@@ -170,22 +170,24 @@
   @media(max-width:520px){#phonics3DOverlay .animal-words-bar{gap:8px;padding-left:9px;padding-right:9px}#phonics3DOverlay .animal-words-bar strong{font-size:13px}}
 </style>
   <style>
-    .special-tool-card{position:relative;isolation:isolate;overflow:hidden;min-height:112px;gap:16px;padding:15px 18px;border:1px solid #8c9cff;background:linear-gradient(112deg,#3836b9 0%,#5147d7 54%,#7654dc 100%);box-shadow:0 12px 24px #4033a83d;color:#fff}
+    .special-tool-card{position:relative;isolation:isolate;overflow:hidden;width:100%;display:grid;grid-template-columns:1fr;gap:10px;padding:13px;border:1px solid #8c9cff;border-radius:24px;background:linear-gradient(125deg,#3836b9 0%,#5147d7 54%,#7654dc 100%);box-shadow:0 12px 24px #4033a83d;color:#fff;text-align:center}
     .special-tool-card:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 92% 14%,#ffffff27,transparent 32%),linear-gradient(120deg,transparent 30%,#ffffff0d 60%,transparent 80%);pointer-events:none}
     .special-tool-card:hover{transform:translateY(-3px);box-shadow:0 16px 30px #4033a84d}
-    .special-tool-people{position:relative;flex:0 0 118px;height:76px;display:flex;align-items:center;justify-content:center;gap:5px}
-    .special-person{width:56px;height:64px;display:block;border:2px solid #ffffff9c;border-radius:18px;background-image:url('./translator-banner.webp');background-repeat:no-repeat;background-size:204px 68px;box-shadow:inset 0 1px 2px #fff8,0 5px 12px #211b7140;animation:translatorPersonBob 2.2s ease-in-out infinite}
+    .special-tool-banner{display:block;width:100%;height:clamp(130px,20vw,220px);object-fit:cover;object-position:center;border:1px solid #ffffff8a;border-radius:18px;box-shadow:0 6px 14px #211b7140}
+    .special-tool-people{position:relative;width:min(100%,440px);height:84px;margin:0 auto;display:grid;grid-template-columns:76px 1fr 76px;align-items:center;justify-items:center;gap:10px}
+    .special-person{width:68px;height:76px;display:block;border:2px solid #ffffffb5;border-radius:20px;background-image:url('./translator-banner.webp');background-repeat:no-repeat;background-size:248px 83px;box-shadow:inset 0 1px 2px #fff8,0 5px 12px #211b7140;animation:translatorPersonBob 2.2s ease-in-out infinite}
     .special-person-left{background-position:left center;transform-origin:bottom center}
     .special-person-right{background-position:right center;animation-delay:.35s;transform-origin:bottom center}
-    .special-tool-chat{position:absolute;left:50%;top:3px;transform:translateX(-50%);width:28px;height:25px;display:grid;place-items:center;border:1px solid #ffffffa8;border-radius:10px;background:linear-gradient(145deg,#ffed8a,#ffc94a);color:#4b3988;font-size:18px;font-weight:1000;box-shadow:0 3px 8px #28205a40;animation:translatorChatPulse 1.5s ease-in-out infinite}
-    .special-tool-copy em{color:#ffeb9a}
-    .special-tool-copy strong{color:#fff;font-size:18px}
-    .special-tool-copy small{color:#f0edff;font-size:13px}
-    .special-tool-arrow{color:#fff;font-size:30px}
+    .special-sound-wave{width:100%;height:54px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 7px;border:1px solid #ffffff55;border-radius:99px;background:linear-gradient(90deg,#53d7ff32,#ffe47d35,#53d7ff32);box-shadow:inset 0 1px 4px #ffffff30,0 4px 12px #211b7130}
+    .special-sound-wave i{width:5px;height:16px;border-radius:9px;background:linear-gradient(180deg,#fff19a,#6fe5ff);box-shadow:0 0 9px #80e9ff90;transform-origin:center;animation:translatorWave .72s ease-in-out infinite alternate}
+    .special-sound-wave i:nth-child(3n){height:30px;animation-delay:.18s}.special-sound-wave i:nth-child(3n+1){height:22px;animation-delay:.36s}.special-sound-wave i:nth-child(4n){height:40px;animation-delay:.1s}
+    .special-tool-copy{display:grid;gap:3px;justify-items:center;padding:0 8px 4px}
+    .special-tool-copy strong{color:#fff;font-size:19px}
+    .special-tool-copy small{color:#f0edff;font-size:13px;line-height:1.5}
     @keyframes translatorPersonBob{0%,100%{translate:0 1px;rotate:-1deg}50%{translate:0 -4px;rotate:1deg}}
-    @keyframes translatorChatPulse{0%,100%{scale:1}50%{scale:1.12}}
-    @media(max-width:520px){.special-tool-card{min-height:104px;gap:10px;padding:12px}.special-tool-people{flex-basis:94px;height:68px}.special-person{width:44px;height:58px;background-size:169px 56px}.special-tool-copy em{font-size:9px}.special-tool-copy strong{font-size:16px}.special-tool-copy small{font-size:11px}}
-    @media(prefers-reduced-motion:reduce){.special-person,.special-tool-chat{animation:none}}
+    @keyframes translatorWave{from{scale:1 .46;opacity:.7}to{scale:1 1.18;opacity:1}}
+    @media(max-width:520px){.special-tool-card{gap:9px;padding:10px;border-radius:22px}.special-tool-banner{height:clamp(112px,31vw,146px);border-radius:16px}.special-tool-people{height:74px;grid-template-columns:62px 1fr 62px;gap:7px}.special-person{width:56px;height:66px;background-size:204px 68px;border-radius:17px}.special-sound-wave{height:46px;gap:3px;padding:0 5px}.special-sound-wave i{width:4px}.special-tool-copy strong{font-size:17px}.special-tool-copy small{font-size:12px}}
+    @media(prefers-reduced-motion:reduce){.special-person,.special-sound-wave i{animation:none}}
   </style>
 </head>
 <body>
@@ -203,7 +205,7 @@
     <div class="section-head"><div><h2>การเรียนของฉัน</h2><p>ทุกความพยายามมีความหมาย 🌱</p></div><button class="text-btn" onclick="showView('progressView')">ดูพัฒนาการ </button></div>
     <div class="stats"><div class="stat"><div class="stat-icon">⭐</div><div><b id="pointsStat">0</b><span>คะแนนสะสม</span></div></div><div class="stat"><div class="stat-icon">📚</div><div><b id="lessonStat">0</b><span>บทที่เรียนจบ</span></div></div><div class="stat"><div class="stat-icon">🔥</div><div><b id="streakStat">0</b><span>วันที่ฝึกต่อเนื่อง</span></div></div></div>
     <div class="panel daily-timer"><div style="font-size:34px">⏱️</div><div class="daily-timer-copy"><h3>เป้าหมายการเรียนวันนี้</h3><strong id="studyTimeLabel">0:00 / 60:00 นาที</strong><div class="timer-track"><i id="studyTimeBar"></i></div><p class="install-hint" id="studyTimeNote">เวลาจะนับตอนอยู่ในหน้าบทเรียนและกิจกรรม</p></div></div>
-    <section class="special-tools"><div class="section-head"><div><h2>เมนูพิเศษ</h2><p>เครื่องมือช่วยสื่อสาร แยกจากบทเรียน</p></div></div><button class="special-tool-card" type="button" onclick="showView('interpreterView')"><span class="special-tool-people" aria-hidden="true"><span class="special-person special-person-left"></span><span class="special-person special-person-right"></span><span class="special-tool-chat">↔</span></span><span class="special-tool-copy"><em>ENGLISH ADVENTURE · SPECIAL</em><strong>ล่ามแปลภาษา</strong><small>คุยกันสองฝ่ายด้วยเสียงและแปลให้อัตโนมัติ</small></span><span class="special-tool-arrow" aria-hidden="true">›</span></button></section>
+    <section class="special-tools"><div class="section-head"><div><h2>เมนูพิเศษ</h2><p>เครื่องมือช่วยสื่อสาร แยกจากบทเรียน</p></div></div><button class="special-tool-card" type="button" onclick="showView('interpreterView')"><img class="special-tool-banner" src="./translator-banner.webp" alt="" aria-hidden="true"><span class="special-tool-people" aria-hidden="true"><span class="special-person special-person-left"></span><span class="special-sound-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="special-person special-person-right"></span></span><span class="special-tool-copy"><strong>ล่ามแปลภาษา</strong><small>พูดคนละภาษา ก็สื่อสารกันได้</small></span></button></section>
   </section>
   <section class="view" id="lessonsView"><div class="section-head"><div><h2>บทเรียน <span id="courseGradeTitle">ป.2</span></h2><p id="courseTrackNote">เลือกเรื่องที่อยากเรียนวันนี้ได้เลย</p></div></div><div class="panel" id="versionPanel" style="margin-bottom:16px"></div><div id="alphabetEntry"></div><div id="phonics3DEntry"></div><div class="unit-grid" id="allUnits"></div>
   <section class="animal-words-section" id="animalWordsSection" hidden>
@@ -237,7 +239,7 @@
 <div class="eye-break-overlay" id="eyeBreakOverlay" aria-hidden="true" role="dialog" aria-label="พักสายตา"><div class="eye-break-card"><div class="eye-break-icon">🌳</div><p class="eyebrow">พักสายตาสักครู่นะคะ</p><h2>มองไปไกล ๆ</h2><p>มองสิ่งที่อยู่ห่างประมาณ 6 เมตร เพื่อพักสายตา</p><div class="eye-break-count" id="eyeBreakCountdown">20</div><p>วินาที แล้วกลับมาเรียนต่อกันค่ะ</p></div></div>
 <script src="./courses.js"></script>
 <script src="./app.js"></script>
-<script src="./learning-plus.js?v=20261116-guideupdate"></script>
+<script src="./learning-plus.js?v=20261116-translator-card"></script>
 
 
 <div id="animalWordsOverlay" hidden aria-hidden="true">
